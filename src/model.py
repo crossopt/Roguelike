@@ -2,8 +2,8 @@
 
 # from src.map import Map, Position
 # from src.fighter import Fighter
-import fighter
-import world_map
+from src import fighter
+from src import world_map
 
 from enum import Enum
 

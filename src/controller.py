@@ -1,11 +1,10 @@
 """ Module containing the main controller logic for the game. """
 
 import sys
-sys.path.append(".")
 
-import model
-import world_map as package_map
-import view
+from src import model
+from src import world_map as package_map
+from src import view
 # from src.model import Model, Will
 # from src.view import View
 
@@ -17,6 +16,7 @@ class Controller(object):
     def __init__(self):
         self.model = model.Model()
         self.isAppRunning = True
+        self.view = None
 
     def run_loop(self):
         with tcod.console_init_root(80, 60, vsync=True, order='C') as root_console:

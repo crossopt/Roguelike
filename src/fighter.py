@@ -1,7 +1,7 @@
 """ Module containing the implementation of various in-game fighters. """
 
-import model
-import world_map
+from src import model
+from src import world_map
 
 class Fighter(object):
     """ Class for storing the various in-game fighter characters. """

@@ -24,11 +24,10 @@ class View:
         self.console.default_fg = text_color
 
     def draw(self, model: Model):
-    	pass
-        # self.console.clear()
-        # for i in range(model.map.height):
-        #     for j in range(model.map.width):
-        #         self.console.bg[i, j] = tile_to_bg[model.map[i][j]]
-        # player_coords = model.player.position.x, model.player.position.y
-        # self.console.ch[player_coords] = ord("F")
-        # self.console.fg[player_coords] = player_color
+        self.console.clear()
+        for i in range(model.map.height):
+            for j in range(model.map.width):
+                self.console.bg[i, j] = tile_to_bg[model.map.tiles[i][j]]
+        player_coords = model.player.position.x, model.player.position.y
+        self.console.ch[player_coords] = ord("F")
+        self.console.fg[player_coords] = player_color
