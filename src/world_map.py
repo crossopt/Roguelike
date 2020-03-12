@@ -46,6 +46,12 @@ class WorldMap(object):
         self.width = WorldMap._DEFAULT_MAP_SIZE
         self.tiles = [[MapTile.EMPTY for i in range(self.width)] for j in range(self.height)]
 
+    def get_player_start(self):
+        """ Returns a starting position for the player: the first free tile. """
+        for x, y in product(range(self.height), range(self.width)):
+            if self.tiles[x][y] == MapTile.EMPTY:
+                return Position(x, y)
+
     def generate(self, height, width):
         """ Randomly generates a map of size height x width. """
         self.height = height
@@ -81,7 +87,7 @@ class WorldMap(object):
             raise MapParsingException(exception)
 
     def is_on_map(self, position):
-        return 0 <= position.x and position.x < self.height and 0 <= position.y and position.y < self.width
+        return 0 <= position.x < self.height and 0 <= position.y < self.width
 
     @staticmethod
     def _trim_lines(lines):
