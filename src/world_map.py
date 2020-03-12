@@ -80,6 +80,9 @@ class WorldMap(object):
         except IOError as exception:
             raise MapParsingException(exception)
 
+    def is_on_map(self, position):
+        return 0 <= position.x and position.x < self.height and 0 <= position.y and position.y < self.width
+
     @staticmethod
     def _trim_lines(lines):
         """ Removes excess empty symbols from lines before their conversion to a map. """

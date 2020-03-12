@@ -49,7 +49,9 @@ class Controller(object):
                 for fighter in fighters:
                     print(fighter, fighter.position.x, fighter.position.y)
                     intentable_position = fighter.choose_move(world_map)
-                    if tiles[intentable_position.x][intentable_position.y] == package_map.MapTile.EMPTY: # ideally ask map
+                    if world_map.is_on_map(intentable_position) and \
+                        tiles[intentable_position.x][intentable_position.y] == package_map.MapTile.EMPTY: # ideally ask map
+                        
                         fighter.move(intentable_position)
 
     def dispatch(self, code, mod):
