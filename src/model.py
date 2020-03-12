@@ -16,6 +16,9 @@ class Model(object):
     def set_player_will(self, will):
         self.player.set_intention(will)
 
+    def get_fighters(self):
+        return [self.player]
+
 
 class Will(Enum):
 

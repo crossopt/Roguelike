@@ -34,15 +34,14 @@ class MapTile(Enum):
                 'X': MapTile.BLOCKED}.get(char, MapTile.INVALID)
 
 
-class WorldMap(object):
+class Map(object):
     """ Class for storing the world map. """
     _WALL_PERCENTAGE = 0.4
-    _DEFAULT_MAP_SIZE = 10
 
     def __init__(self):
-        """ Generates a default map example. """
-        self.height = WorldMap._DEFAULT_MAP_SIZE
-        self.width = WorldMap._DEFAULT_MAP_SIZE
+        """ Generates a map example of size 5x5. """
+        self.height = 5
+        self.width = 5
         self.tiles = [[MapTile.EMPTY for i in range(self.width)] for j in range(self.height)]
 
     def generate(self, height, width):
@@ -51,11 +50,11 @@ class WorldMap(object):
         self.width = width
         self.tiles = [[MapTile.EMPTY for i in range(self.width)] for j in range(self.height)]
 
-        for block in range(height * width * WorldMap._WALL_PERCENTAGE):
+        for block in range(height * width * Map._WALL_PERCENTAGE):
             block_x = randrange(height)
             block_y = randrange(width)
             self.tiles[block_x][block_y] = MapTile.BLOCKED
-            if not WorldMap._is_one_component(self.tiles):
+            if not Map._is_one_component(self.tiles):
                 self.tiles[block_x][block_y] = MapTile.EMPTY
 
     def load(self, file_name):
@@ -71,11 +70,15 @@ class WorldMap(object):
         """
         try:
             with open(file_name, 'r') as fin:
-                lines = WorldMap._trim_lines(fin.readlines())
-                converted_tiles = WorldMap._convert_to_tiles(lines)
+                lines = Map._trim_lines(fin.readlines())
+                converted_tiles = Map._convert_to_tiles(lines)
+
+                if not Map._is_one_component(converted_tiles):
+                    raise MapParsingException('Map is not a connected component')
                 self.height = len(lines)
                 self.width = len(lines[0])
                 self.tiles = converted_tiles
+
         except IOError as exception:
             raise MapParsingException(exception)
 
@@ -108,24 +111,13 @@ class WorldMap(object):
                     raise MapParsingException('Invalid symbol {} in line {}'.format(symbol, string))
                 converted_string.append(converted_symbol)
             converted_tiles.append(converted_string)
-        if not WorldMap._is_one_component(converted_tiles):
-            raise MapParsingException('Map is not a connected component')
         return converted_tiles
 
     @staticmethod
-    def _is_one_component(world_map):
+    def _is_one_component(tile_map):
         """ Checks whether the passed map contains one connected component.
 
         Returns True if all of the empty tiles are reachable from any empty tile
         on the given map, or False otherwise.
         """
-        was_visited = list(map(lambda x: list(map(lambda y: y != MapTile.EMPTY, x)), world_map))
-
-        def _is_valid_tile(x, y):
-            return 0 <= x < len(was_visited) and 0 <= y < len(was_visited[x])
-
-        def _dfs(x, y):
-            if not _is_valid_tile(x, y) or was_visited[x][y]:
-                was_visited[x][y] = True
-                for dx, dy in {(0, 1), (0, -1), (1, 0), (-1, 0)}:
-                    _dfs(x + dx, y + dy)
+        pass
