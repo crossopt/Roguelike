@@ -29,7 +29,7 @@ class MapTile(Enum):
         '.' is an empty space on the map, 'X' a blocked space.
 
         :param char: a single-character string to convert to a MapTile.
-        :return: the corresponding MapTile, or MapTile.INVALID if the char is incorrect.
+        :returns the corresponding MapTile, or MapTile.INVALID if the char is incorrect.
         """
         return {'.': MapTile.EMPTY,
                 'X': MapTile.BLOCKED}.get(char, MapTile.INVALID)
@@ -51,11 +51,12 @@ class WorldMap:
         for x, y in product(range(self.height), range(self.width)):
             if self.tiles[x][y] == MapTile.EMPTY:
                 return Position(x, y)
+        return None
 
     def generate(self, height, width):
         """ Randomly generates a map of size height x width.
 
-        :raise: ValueError if height or width are incorrect.
+        :raises ValueError if height or width are incorrect.
         """
         if height <= 0:
             raise ValueError('Invalid map height')
@@ -81,7 +82,7 @@ class WorldMap:
 
         If the map loading fails and an exception is thrown the old map is left unmodified.
 
-        :raise: MapParsingException if the file's contents could not be parsed into a valid map.
+        :raises MapParsingException if the file's contents could not be parsed into a valid map.
         """
         try:
             with open(file_name, 'r') as fin:
@@ -110,7 +111,7 @@ class WorldMap:
         if the strings contain invalid symbols or if the resulting map is not a
         single connected component.
 
-        :raise: MapParsingException if the string list encodes an invalid board.
+        :raises MapParsingException if the string list encodes an invalid board.
         """
         if len(string_list) <= 0:
             raise MapParsingException('Invalid map height')
@@ -134,7 +135,7 @@ class WorldMap:
     def _is_one_component(world_map):
         """ Checks whether the passed map contains one connected component.
 
-        Returns True if all of the empty tiles are reachable from any empty tile
+        :returns True if all of the empty tiles are reachable from any empty tile
         on the given map, or False otherwise.
         """
         was_visited = list(map(lambda x: list(map(lambda y: y != MapTile.EMPTY, x)), world_map))

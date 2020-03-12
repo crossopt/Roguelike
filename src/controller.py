@@ -13,6 +13,14 @@ class Controller:
     _DEFAULT_MAP_WIDTH = 10
     _DEFAULT_MAP_HEIGHT = 10
 
+    _TILESET_PATH = 'big_font.png'
+    _TILESET_OPTIONS = tcod.FONT_LAYOUT_ASCII_INROW | tcod.FONT_TYPE_GREYSCALE
+    _TILESET_HORIZONTAL = 16
+    _TILESET_VERTICAL = 16
+
+    _WINDOW_HEIGTH = 10
+    _WINDOW_WIDTH = 10
+
     def __init__(self):
         game_map = world_map.WorldMap()
         game_map.generate(Controller._DEFAULT_MAP_HEIGHT, Controller._DEFAULT_MAP_WIDTH)
@@ -22,13 +30,15 @@ class Controller:
 
     def run_loop(self):
         tcod.console_set_custom_font(
-            'big_font.png',
-            tcod.FONT_LAYOUT_ASCII_INROW | tcod.FONT_TYPE_GREYSCALE,
-            16,
-            16,
+            Controller._TILESET_PATH,
+            Controller._TILESET_OPTIONS,
+            Controller._TILESET_HORIZONTAL,
+            Controller._TILESET_VERTICAL,
         )
 
-        with tcod.console_init_root(10, 10, vsync=True, order='C') as root_console:
+        with tcod.console_init_root(Controller._WINDOW_WIDTH,
+                                    Controller._WINDOW_HEIGTH,
+                                    vsync=True, order='C') as root_console:
             self.view = view.View(root_console)
 
             while self.program_is_running:
@@ -38,11 +48,11 @@ class Controller:
                 self.model.set_player_intention(src.fighter.FighterIntention.STAY)
 
                 for event in tcod.event.wait():
-                    if event.type == "QUIT":
+                    if event.type == 'QUIT':
                         self.program_is_running = False
                         break
-                    
-                    if event.type == "KEYDOWN":
+
+                    if event.type == 'KEYDOWN':
                         if event.repeat:
                             continue
                         self.dispatch(event.scancode, event.mod)
