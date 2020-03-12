@@ -1,14 +1,15 @@
 """ Module containing the implementation of various in-game fighters. """
+from enum import Enum
 
-from src import model
 from src import world_map
 
-class Fighter(object):
+
+class Fighter:
     """ Class for storing the various in-game fighter characters. """
     def __init__(self, initial_position):
         """ Initializes a fighter with the given initial position. """
         self.position = initial_position
-        self.intention = model.Will.STAY
+        self.intention = Will.STAY
 
     def move(self, new_position):
         """ Changes the fighter's position. """
@@ -17,21 +18,27 @@ class Fighter(object):
     def set_intention(self, will):
         self.intention = will
 
-
-    def choose_move(self, current_map):
-
-        if self.intention == model.Will.STAY:
+    def choose_move(self, _current_map):
+        if self.intention == Will.STAY:
             dx, dy = 0, 0
-        elif self.intention == model.Will.MOVE_UP:
+        elif self.intention == Will.MOVE_UP:
             dx, dy = -1, 0
-        elif self.intention == model.Will.MOVE_LEFT:
+        elif self.intention == Will.MOVE_LEFT:
             dx, dy = 0, -1
-        elif self.intention == model.Will.MOVE_DOWN:
+        elif self.intention == Will.MOVE_DOWN:
             dx, dy = 1, 0
-        elif self.intention == model.Will.MOVE_RIGHT:
+        elif self.intention == Will.MOVE_RIGHT:
             dx, dy = 0, 1
         else:
             raise ValueError("Will is incorrect")
 
-        intentable_position = world_map.Position(self.position.x + dx, self.position.y + dy)
-        return intentable_position
+        chosen_position = world_map.Position(self.position.x + dx, self.position.y + dy)
+        return chosen_position
+
+
+class Will(Enum):
+    STAY = 0
+    MOVE_UP = 1
+    MOVE_LEFT = 2
+    MOVE_DOWN = 3
+    MOVE_RIGHT = 4

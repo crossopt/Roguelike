@@ -1,15 +1,13 @@
 """ Module containing the main controller logic for the game. """
 
-import sys
-
-from src import model
-from src import world_map
-from src import view
-# from src.model import Model, Will
-# from src.view import View
-
 import tcod
 import tcod.event
+
+import src.fighter
+from src import model
+from src import view
+from src import world_map
+
 
 class Controller(object):
 
@@ -35,7 +33,7 @@ class Controller(object):
                 self.view.draw(self.model)
                 tcod.console_flush()
 
-                self.model.set_player_will(model.Will.STAY)
+                self.model.set_player_will(src.fighter.Will.STAY)
 
                 for event in tcod.event.wait():
                     print(event.type)
@@ -65,13 +63,13 @@ class Controller(object):
 
     def dispatch(self, code, mod):
         if code == tcod.event.SCANCODE_W:
-            self.model.set_player_will(model.Will.MOVE_UP)
+            self.model.set_player_will(src.fighter.Will.MOVE_UP)
         elif code == tcod.event.SCANCODE_A:
-            self.model.set_player_will(model.Will.MOVE_LEFT)
+            self.model.set_player_will(src.fighter.Will.MOVE_LEFT)
         elif code == tcod.event.SCANCODE_S:
-            self.model.set_player_will(model.Will.MOVE_DOWN)
+            self.model.set_player_will(src.fighter.Will.MOVE_DOWN)
         elif code == tcod.event.SCANCODE_D:
-            self.model.set_player_will(model.Will.MOVE_RIGHT)            
+            self.model.set_player_will(src.fighter.Will.MOVE_RIGHT)
 
 
 
