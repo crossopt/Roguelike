@@ -53,7 +53,14 @@ class WorldMap(object):
                 return Position(x, y)
 
     def generate(self, height, width):
-        """ Randomly generates a map of size height x width. """
+        """ Randomly generates a map of size height x width.
+
+        :raise: ValueError if height or width are incorrect.
+        """
+        if height <= 0:
+            raise ValueError('Invalid map height')
+        if width <= 0:
+            raise ValueError('Invalid map width')
         self.height = height
         self.width = width
         self.tiles = [[MapTile.EMPTY for i in range(self.width)] for j in range(self.height)]
@@ -87,6 +94,7 @@ class WorldMap(object):
             raise MapParsingException(exception)
 
     def is_on_map(self, position):
+        """ Returns True if the given position exists on the map, False otherwise. """
         return 0 <= position.x < self.height and 0 <= position.y < self.width
 
     @staticmethod
