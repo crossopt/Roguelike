@@ -37,11 +37,12 @@ class MapTile(Enum):
 class WorldMap(object):
     """ Class for storing the world map. """
     _WALL_PERCENTAGE = 0.4
+    _DEFAULT_MAP_SIZE = 10
 
     def __init__(self):
-        """ Generates a map example of size 5x5. """
-        self.height = 5
-        self.width = 5
+        """ Generates a default map example. """
+        self.height = WorldMap._DEFAULT_MAP_SIZE
+        self.width = WorldMap._DEFAULT_MAP_SIZE
         self.tiles = [[MapTile.EMPTY for i in range(self.width)] for j in range(self.height)]
 
     def generate(self, height, width):
@@ -108,7 +109,7 @@ class WorldMap(object):
                 converted_string.append(converted_symbol)
             converted_tiles.append(converted_string)
         if not WorldMap._is_one_component(converted_tiles):
-            raise MapParsingException('WorldMap is not a connected component')
+            raise MapParsingException('Map is not a connected component')
         return converted_tiles
 
     @staticmethod
@@ -118,4 +119,13 @@ class WorldMap(object):
         Returns True if all of the empty tiles are reachable from any empty tile
         on the given map, or False otherwise.
         """
-        pass
+        was_visited = list(map(lambda x: list(map(lambda y: y != MapTile.EMPTY, x)), world_map))
+
+        def _is_valid_tile(x, y):
+            return 0 <= x < len(was_visited) and 0 <= y < len(was_visited[x])
+
+        def _dfs(x, y):
+            if not _is_valid_tile(x, y) or was_visited[x][y]:
+                was_visited[x][y] = True
+                for dx, dy in {(0, 1), (0, -1), (1, 0), (-1, 0)}:
+                    _dfs(x + dx, y + dy)
