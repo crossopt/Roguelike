@@ -6,30 +6,30 @@ from tcod.console import Console
 from src.model import Model
 from src.world_map import MapTile
 
-wall_color = tcod.white
-path_color = tcod.black
-player_color = tcod.yellow
-text_color = tcod.grey
+WALL_COLOR = tcod.white
+PATH_COLOR = tcod.black
+PLAYER_COLOR = tcod.yellow
+TEXT_COLOR = tcod.grey
 
-ord_smiley = 1
+ORD_SMILEY = 1
 
-tile_to_bg = {
-    MapTile.BLOCKED: wall_color,
-    MapTile.EMPTY: path_color
+TILE_TO_BG = {
+    MapTile.BLOCKED: WALL_COLOR,
+    MapTile.EMPTY: PATH_COLOR
 }
 
 
 class View:
     def __init__(self, root_console: Console):
         self.console = root_console
-        self.console.default_bg = wall_color
-        self.console.default_fg = text_color
+        self.console.default_bg = WALL_COLOR
+        self.console.default_fg = TEXT_COLOR
 
     def draw(self, model: Model):
         self.console.clear()
         for i in range(model.map.height):
             for j in range(model.map.width):
-                self.console.bg[i, j] = tile_to_bg[model.map.tiles[i][j]]
+                self.console.bg[i, j] = TILE_TO_BG[model.map.tiles[i][j]]
         player_coords = model.player.position.x, model.player.position.y
-        self.console.ch[player_coords] = ord_smiley
-        self.console.fg[player_coords] = player_color
+        self.console.ch[player_coords] = ORD_SMILEY
+        self.console.fg[player_coords] = PLAYER_COLOR

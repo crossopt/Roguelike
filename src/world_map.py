@@ -5,7 +5,7 @@ from random import randrange
 from itertools import product
 
 
-class Position(object):
+class Position:
     """ Class for storing the position of various objects on the map. """
     def __init__(self, x, y):
         self.x = x
@@ -35,7 +35,7 @@ class MapTile(Enum):
                 'X': MapTile.BLOCKED}.get(char, MapTile.INVALID)
 
 
-class WorldMap(object):
+class WorldMap:
     """ Class for storing the world map. """
     _WALL_PERCENTAGE = 0.4
     _DEFAULT_MAP_SIZE = 10

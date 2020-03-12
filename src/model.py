@@ -5,7 +5,7 @@ from src.world_map import Position
 from src.world_map import WorldMap
 
 
-class Model(object):
+class Model:
     """ Class encapsulating the state of the game world. """
     def __init__(self, wmap: WorldMap, player_start: Position):
         self.map = wmap

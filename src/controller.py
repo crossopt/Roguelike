@@ -9,13 +9,12 @@ from src import view
 from src import world_map
 
 
-class Controller(object):
-
+class Controller:
     def __init__(self):
         wmap = world_map.WorldMap()
         wmap.generate(10, 10)
         self.model = model.Model(wmap, wmap.get_player_start())
-        self.isAppRunning = True
+        self.program_is_running = True
         self.view = None
 
     def run_loop(self):
@@ -28,8 +27,8 @@ class Controller(object):
 
         with tcod.console_init_root(10, 10, vsync=True, order='C') as root_console:
             self.view = view.View(root_console)
-            
-            while self.isAppRunning:
+
+            while self.program_is_running:
                 self.view.draw(self.model)
                 tcod.console_flush()
 
@@ -39,7 +38,7 @@ class Controller(object):
                     print(event.type)
 
                     if event.type == "QUIT":
-                        self.isAppRunning = False
+                        self.program_is_running = False
                         break
 
                     if event.type == "KEYDOWN":
@@ -58,10 +57,10 @@ class Controller(object):
                     intentable_position = fighter.choose_move(world_map)
                     if wmap.is_on_map(intentable_position) and \
                         tiles[intentable_position.x][intentable_position.y] == world_map.MapTile.EMPTY: # ideally ask map
-                        
+
                         fighter.move(intentable_position)
 
-    def dispatch(self, code, mod):
+    def dispatch(self, code, _mod):
         if code == tcod.event.SCANCODE_W:
             self.model.set_player_will(src.fighter.Will.MOVE_UP)
         elif code == tcod.event.SCANCODE_A:
@@ -70,10 +69,3 @@ class Controller(object):
             self.model.set_player_will(src.fighter.Will.MOVE_DOWN)
         elif code == tcod.event.SCANCODE_D:
             self.model.set_player_will(src.fighter.Will.MOVE_RIGHT)
-
-
-
-if __name__ == "__main__":
-    Controller().run_loop()
-
-
