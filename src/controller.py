@@ -3,7 +3,7 @@
 import sys
 
 from src import model
-from src import world_map as package_map
+from src import world_map
 from src import view
 # from src.model import Model, Will
 # from src.view import View
@@ -14,7 +14,9 @@ import tcod.event
 class Controller(object):
 
     def __init__(self):
-        self.model = model.Model()
+        wmap = world_map.WorldMap()
+        wmap.generate(10, 10)
+        self.model = model.Model(wmap, wmap.get_player_start())
         self.isAppRunning = True
         self.view = None
 
@@ -26,7 +28,6 @@ class Controller(object):
             16,
         )
 
-        self.model.map.generate(10, 10)
         with tcod.console_init_root(10, 10, vsync=True, order='C') as root_console:
             self.view = view.View(root_console)
             
@@ -50,15 +51,15 @@ class Controller(object):
                         print(event.scancode, event.mod)
                         self.dispatch(event.scancode, event.mod)
 
-                world_map = self.model.map
-                tiles = world_map.tiles
+                wmap = self.model.map
+                tiles = wmap.tiles
                 fighters = self.model.get_fighters()
 
                 for fighter in fighters:
                     print(fighter, fighter.position.x, fighter.position.y)
                     intentable_position = fighter.choose_move(world_map)
-                    if world_map.is_on_map(intentable_position) and \
-                        tiles[intentable_position.x][intentable_position.y] == package_map.MapTile.EMPTY: # ideally ask map
+                    if wmap.is_on_map(intentable_position) and \
+                        tiles[intentable_position.x][intentable_position.y] == world_map.MapTile.EMPTY: # ideally ask map
                         
                         fighter.move(intentable_position)
 
