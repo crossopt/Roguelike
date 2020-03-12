@@ -11,6 +11,8 @@ path_color = tcod.black
 player_color = tcod.yellow
 text_color = tcod.grey
 
+ord_smiley = 1
+
 tile_to_bg = {
     MapTile.BLOCKED: wall_color,
     MapTile.EMPTY: path_color
@@ -29,5 +31,5 @@ class View:
             for j in range(model.map.width):
                 self.console.bg[i, j] = tile_to_bg[model.map.tiles[i][j]]
         player_coords = model.player.position.x, model.player.position.y
-        self.console.ch[player_coords] = ord("F")
+        self.console.ch[player_coords] = ord_smiley
         self.console.fg[player_coords] = player_color
