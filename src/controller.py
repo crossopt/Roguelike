@@ -4,6 +4,7 @@ import sys
 sys.path.append(".")
 
 import model
+import world_map as package_map
 import view
 # from src.model import Model, Will
 # from src.view import View
@@ -42,17 +43,24 @@ class Controller(object):
                         self.dispatch(event.scancode, event.mod)
 
                 world_map = self.model.map
+                tiles = world_map.tiles
                 fighters = self.model.get_fighters()
 
                 for fighter in fighters:
                     print(fighter, fighter.position.x, fighter.position.y)
                     intentable_position = fighter.choose_move(world_map)
-                    if True: # ideally ask map
+                    if tiles[intentable_position.x][intentable_position.y] == package_map.MapTile.EMPTY: # ideally ask map
                         fighter.move(intentable_position)
 
     def dispatch(self, code, mod):
         if code == tcod.event.SCANCODE_W:
             self.model.set_player_will(model.Will.MOVE_UP)
+        elif code == tcod.event.SCANCODE_A:
+            self.model.set_player_will(model.Will.MOVE_LEFT)
+        elif code == tcod.event.SCANCODE_S:
+            self.model.set_player_will(model.Will.MOVE_DOWN)
+        elif code == tcod.event.SCANCODE_D:
+            self.model.set_player_will(model.Will.MOVE_RIGHT)            
 
 
 

@@ -24,11 +24,14 @@ class Fighter(object):
             dx, dy = 0, 0
         elif self.intention == model.Will.MOVE_UP:
             dx, dy = -1, 0
+        elif self.intention == model.Will.MOVE_LEFT:
+            dx, dy = 0, -1
+        elif self.intention == model.Will.MOVE_DOWN:
+            dx, dy = 1, 0
+        elif self.intention == model.Will.MOVE_RIGHT:
+            dx, dy = 0, 1
         else:
-            print(type(self.intention))
-            print(type(model.Will.MOVE_UP))
-            print(self.intention.__eq__(model.Will.MOVE_UP))
-            raise ValueError("?")
+            raise ValueError("Will is incorrect")
 
         intentable_position = world_map.Position(self.position.x + dx, self.position.y + dy)
         return intentable_position

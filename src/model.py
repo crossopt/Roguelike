@@ -1,8 +1,9 @@
 """ Module containing the world logic for the game. """
 
-from src.map import Map, Position
+# from src.map import Map, Position
 # from src.fighter import Fighter
 import fighter
+import world_map
 
 from enum import Enum
 
@@ -10,8 +11,8 @@ from enum import Enum
 class Model(object):
     """ Class encapsulating the state of the game world. """
     def __init__(self):
-        self.map = Map()
-        self.player = fighter.Fighter(Position(0, 0))
+        self.map = world_map.WorldMap()
+        self.player = fighter.Fighter(world_map.Position(0, 0))
 
     def set_player_will(self, will):
         self.player.set_intention(will)
@@ -24,3 +25,6 @@ class Will(Enum):
 
     STAY = 0
     MOVE_UP = 1
+    MOVE_LEFT = 2
+    MOVE_DOWN = 3
+    MOVE_RIGHT = 4
