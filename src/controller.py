@@ -25,6 +25,8 @@ class Controller(object):
                 self.view.draw(self.model)
                 tcod.console_flush()
 
+                self.model.set_player_will(model.Will.STAY)
+
                 for event in tcod.event.wait():
                     print(event.type)
 
@@ -41,7 +43,9 @@ class Controller(object):
 
                 world_map = self.model.map
                 fighters = self.model.get_fighters()
+
                 for fighter in fighters:
+                    print(fighter, fighter.position.x, fighter.position.y)
                     intentable_position = fighter.choose_move(world_map)
                     if True: # ideally ask map
                         fighter.move(intentable_position)
