@@ -2,6 +2,7 @@
 
 from enum import Enum
 from random import randrange
+from itertools import product
 
 
 class Position(object):
@@ -129,3 +130,10 @@ class WorldMap(object):
                 was_visited[x][y] = True
                 for dx, dy in {(0, 1), (0, -1), (1, 0), (-1, 0)}:
                     _dfs(x + dx, y + dy)
+
+        component_amount = 0
+        for x, y in product(range(len(world_map)), range(max(map(len, world_map)))):
+            if not was_visited[x][y]:
+                _dfs(x, y)
+                component_amount += 1
+        return component_amount == 1
