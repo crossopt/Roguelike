@@ -6,7 +6,7 @@ from .map import Map
 
 
 class View:
-    def __init__(self):
+    def __init__(self, root_console):
         pass
 
     def draw(self, model: Model):
