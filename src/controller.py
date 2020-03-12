@@ -3,8 +3,10 @@
 import sys
 sys.path.append(".")
 
-from src.model import Model, Will
-from src.view import View
+import model
+import view
+# from src.model import Model, Will
+# from src.view import View
 
 import tcod
 import tcod.event
@@ -12,12 +14,12 @@ import tcod.event
 class Controller(object):
 
     def __init__(self):
-        self.model = Model()
+        self.model = model.Model()
         self.isAppRunning = True
 
     def run_loop(self):
         with tcod.console_init_root(80, 60, vsync=True, order='C') as root_console:
-            self.view = View(root_console)
+            self.view = view.View(root_console)
             
             while self.isAppRunning:
                 self.view.draw(self.model)
@@ -37,9 +39,16 @@ class Controller(object):
                         print(event.scancode, event.mod)
                         self.dispatch(event.scancode, event.mod)
 
+                world_map = self.model.map
+                fighters = self.model.get_fighters()
+                for fighter in fighters:
+                    intentable_position = fighter.choose_move(world_map)
+                    if True: # ideally ask map
+                        fighter.move(intentable_position)
+
     def dispatch(self, code, mod):
         if code == tcod.event.SCANCODE_W:
-            self.model.set_player_will(Will.MOVE_UP)
+            self.model.set_player_will(model.Will.MOVE_UP)
 
 
 
