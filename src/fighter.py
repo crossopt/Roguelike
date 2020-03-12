@@ -1,4 +1,5 @@
 """ Module containing the implementation of various in-game fighters. """
+
 from enum import Enum
 
 from src import world_map
@@ -41,7 +42,7 @@ class Fighter:
         elif self.intention == FighterIntention.MOVE_RIGHT:
             dx, dy = 0, 1
         else:
-            raise ValueError("FighterIntention is incorrect")
+            raise ValueError('FighterIntention is incorrect')
 
         chosen_position = world_map.Position(self.position.x + dx, self.position.y + dy)
         return chosen_position
