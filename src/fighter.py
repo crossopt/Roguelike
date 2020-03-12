@@ -16,6 +16,7 @@ class FighterIntention(Enum):
 
 class Fighter:
     """ Class for storing the various in-game fighter characters. """
+
     def __init__(self, initial_position):
         """ Initializes a fighter with the given initial position. """
         self.position = initial_position
@@ -31,18 +32,13 @@ class Fighter:
 
     def choose_move(self, _current_map):
         """ Selects a move based on the state of the game map. """
-        if self.intention == FighterIntention.STAY:
-            dx, dy = 0, 0
-        elif self.intention == FighterIntention.MOVE_UP:
-            dx, dy = -1, 0
-        elif self.intention == FighterIntention.MOVE_LEFT:
-            dx, dy = 0, -1
-        elif self.intention == FighterIntention.MOVE_DOWN:
-            dx, dy = 1, 0
-        elif self.intention == FighterIntention.MOVE_RIGHT:
-            dx, dy = 0, 1
-        else:
+        move = {FighterIntention.STAY: (0, 0),
+                FighterIntention.MOVE_UP: (-1, 0),
+                FighterIntention.MOVE_LEFT: (0, -1),
+                FighterIntention.MOVE_DOWN: (1, 0),
+                FighterIntention.MOVE_RIGHT: (0, 1)}
+        if self.intention not in move:
             raise ValueError('FighterIntention is incorrect')
-
+        dx, dy = move[self.intention]
         chosen_position = world_map.Position(self.position.x + dx, self.position.y + dy)
         return chosen_position
