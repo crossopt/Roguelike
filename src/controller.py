@@ -76,12 +76,9 @@ class Controller:
         :param code: a scancode of the main key pressed.
         :param _mod: a modifier, a mask of the functional keys pressed with the main one.
         """
-
-        if code == tcod.event.SCANCODE_W:
-            self.model.set_player_intention(src.fighter.FighterIntention.MOVE_UP)
-        elif code == tcod.event.SCANCODE_A:
-            self.model.set_player_intention(src.fighter.FighterIntention.MOVE_LEFT)
-        elif code == tcod.event.SCANCODE_S:
-            self.model.set_player_intention(src.fighter.FighterIntention.MOVE_DOWN)
-        elif code == tcod.event.SCANCODE_D:
-            self.model.set_player_intention(src.fighter.FighterIntention.MOVE_RIGHT)
+        code_to_intention = {tcod.event.SCANCODE_W: src.fighter.FighterIntention.MOVE_UP,
+                             tcod.event.SCANCODE_A: src.fighter.FighterIntention.MOVE_LEFT,
+                             tcod.event.SCANCODE_S: src.fighter.FighterIntention.MOVE_DOWN,
+                             tcod.event.SCANCODE_D: src.fighter.FighterIntention.MOVE_RIGHT}
+        if code in code_to_intention:
+            self.model.set_player_intention(code_to_intention[code])
