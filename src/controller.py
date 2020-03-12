@@ -16,7 +16,7 @@ class Controller(object):
         self.isAppRunning = True
 
     def run_loop(self):
-        with tcod.console_init_root(80, 60, order='F') as root_console:
+        with tcod.console_init_root(80, 60, vsync=True, order='F') as root_console:
             self.view = View(root_console)
             for event in tcod.event.wait():
                 print(event.type)
