@@ -22,7 +22,7 @@ class Controller:
 
     def run_loop(self):
         tcod.console_set_custom_font(
-            "big_font.png",
+            'big_font.png',
             tcod.FONT_LAYOUT_ASCII_INROW | tcod.FONT_TYPE_GREYSCALE,
             16,
             16,
@@ -41,6 +41,7 @@ class Controller:
                     if event.type == "QUIT":
                         self.program_is_running = False
                         break
+                    
                     if event.type == "KEYDOWN":
                         if event.repeat:
                             continue
