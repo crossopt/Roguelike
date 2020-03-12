@@ -99,7 +99,7 @@ class TestWorldMap(unittest.TestCase):
         world_map = WorldMap()
         self.assertTrue(world_map.is_on_map(Position(5, 5)))
         self.assertFalse(world_map.is_on_map(Position(-1, 0)))
-        self.assertTrue(world_map.is_on_map(Position(10, 0)))
+        self.assertFalse(world_map.is_on_map(Position(10, 0)))
         world_map.generate(4, 6)
         self.assertFalse(world_map.is_on_map(Position(5, 5)))
         self.assertTrue(world_map.is_on_map(Position(3, 5)))
