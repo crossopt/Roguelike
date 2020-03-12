@@ -18,8 +18,16 @@ class Controller(object):
     def run_loop(self):
         with tcod.console_init_root(80, 60, vsync=True, order='F') as root_console:
             self.view = View(root_console)
-            for event in tcod.event.wait():
-                print(event.type)
+            
+            while self.isAppRunning:
+                tcod.console_flush()
+
+                for event in tcod.event.wait():
+                    print(event.type)
+
+                    if event.type == "QUIT":
+                        self.isAppRunning = False
+                        break
 
 
 
