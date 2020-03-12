@@ -10,6 +10,7 @@ from src import world_map
 
 
 class Controller:
+    """ The main controller class of the game """
     _DEFAULT_MAP_WIDTH = 10
     _DEFAULT_MAP_HEIGHT = 10
 
@@ -22,6 +23,7 @@ class Controller:
     _WINDOW_WIDTH = 10
 
     def __init__(self):
+        """ Inits main controller of the game """
         game_map = world_map.WorldMap()
         game_map.generate(Controller._DEFAULT_MAP_HEIGHT, Controller._DEFAULT_MAP_WIDTH)
         self.model = model.Model(game_map, game_map.get_player_start())
@@ -29,6 +31,7 @@ class Controller:
         self.view = None
 
     def run_loop(self):
+        """ Main loop of the game """
         tcod.console_set_custom_font(
             Controller._TILESET_PATH,
             Controller._TILESET_OPTIONS,
@@ -68,6 +71,12 @@ class Controller:
                         fighter.move(intended_position)
 
     def dispatch(self, code, _mod):
+        """ Keydown event handler.
+
+        :param code: a scancode of the key pressed.
+        :param _mod: a mask of the functional key pressed with the main one.
+        """
+
         if code == tcod.event.SCANCODE_W:
             self.model.set_player_intention(src.fighter.FighterIntention.MOVE_UP)
         elif code == tcod.event.SCANCODE_A:
