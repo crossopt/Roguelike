@@ -21,8 +21,9 @@ class View:
         self.console.default_bg = wall_color
 
     def draw(self, model: package_model.Model):
-        self.console.clear()
-        for i in range(model.map.height):
-            for j in range(model.map.width):
-                self.console.bg[i, j] = tile_to_bg[model.map[i][j]]
-        self.console.ch[model.player.position.x, model.player.position.y] = ord("F")
+    	pass
+        # self.console.clear()
+        # for i in range(model.map.height):
+        #     for j in range(model.map.width):
+        #         self.console.bg[i, j] = tile_to_bg[model.map[i][j]]
+        # self.console.ch[model.player.position.x, model.player.position.y] = ord("F")
