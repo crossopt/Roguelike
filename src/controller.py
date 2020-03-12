@@ -32,7 +32,7 @@ class Controller:
                 self.view.draw(self.model)
                 tcod.console_flush()
 
-                self.model.set_player_will(src.fighter.FighterIntention.STAY)
+                self.model.set_player_intention(src.fighter.FighterIntention.STAY)
 
                 for event in tcod.event.wait():
                     print(event.type)
@@ -54,18 +54,17 @@ class Controller:
 
                 for fighter in fighters:
                     print(fighter, fighter.position.x, fighter.position.y)
-                    intentable_position = fighter.choose_move(world_map)
-                    if wmap.is_on_map(intentable_position) and \
-                        tiles[intentable_position.x][intentable_position.y] == world_map.MapTile.EMPTY: # ideally ask map
-
-                        fighter.move(intentable_position)
+                    intended_position = fighter.choose_move(world_map)
+                    if wmap.is_on_map(intended_position) and \
+                            tiles[intended_position.x][intended_position.y] == world_map.MapTile.EMPTY:
+                        fighter.move(intended_position)
 
     def dispatch(self, code, _mod):
         if code == tcod.event.SCANCODE_W:
-            self.model.set_player_will(src.fighter.FighterIntention.MOVE_UP)
+            self.model.set_player_intention(src.fighter.FighterIntention.MOVE_UP)
         elif code == tcod.event.SCANCODE_A:
-            self.model.set_player_will(src.fighter.FighterIntention.MOVE_LEFT)
+            self.model.set_player_intention(src.fighter.FighterIntention.MOVE_LEFT)
         elif code == tcod.event.SCANCODE_S:
-            self.model.set_player_will(src.fighter.FighterIntention.MOVE_DOWN)
+            self.model.set_player_intention(src.fighter.FighterIntention.MOVE_DOWN)
         elif code == tcod.event.SCANCODE_D:
-            self.model.set_player_will(src.fighter.FighterIntention.MOVE_RIGHT)
+            self.model.set_player_intention(src.fighter.FighterIntention.MOVE_RIGHT)
