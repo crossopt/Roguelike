@@ -33,7 +33,7 @@ class Controller(object):
                 self.view.draw(self.model)
                 tcod.console_flush()
 
-                self.model.set_player_will(src.fighter.Will.STAY)
+                self.model.set_player_will(src.fighter.FighterIntention.STAY)
 
                 for event in tcod.event.wait():
                     print(event.type)
@@ -63,13 +63,13 @@ class Controller(object):
 
     def dispatch(self, code, mod):
         if code == tcod.event.SCANCODE_W:
-            self.model.set_player_will(src.fighter.Will.MOVE_UP)
+            self.model.set_player_will(src.fighter.FighterIntention.MOVE_UP)
         elif code == tcod.event.SCANCODE_A:
-            self.model.set_player_will(src.fighter.Will.MOVE_LEFT)
+            self.model.set_player_will(src.fighter.FighterIntention.MOVE_LEFT)
         elif code == tcod.event.SCANCODE_S:
-            self.model.set_player_will(src.fighter.Will.MOVE_DOWN)
+            self.model.set_player_will(src.fighter.FighterIntention.MOVE_DOWN)
         elif code == tcod.event.SCANCODE_D:
-            self.model.set_player_will(src.fighter.Will.MOVE_RIGHT)
+            self.model.set_player_will(src.fighter.FighterIntention.MOVE_RIGHT)
 
 
 

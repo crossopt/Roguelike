@@ -100,7 +100,7 @@ class WorldMap(object):
     @staticmethod
     def _trim_lines(lines):
         """ Removes excess empty symbols from lines before their conversion to a map. """
-        return list(filter(lambda x: x != "", map(lambda x: x.strip(), lines)))
+        return list(filter(lambda x: x != '', map(lambda x: x.strip(), lines)))
 
     @staticmethod
     def _convert_to_tiles(string_list):
