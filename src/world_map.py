@@ -58,7 +58,7 @@ class WorldMap(object):
         self.width = width
         self.tiles = [[MapTile.EMPTY for i in range(self.width)] for j in range(self.height)]
 
-        for block in range(height * width * WorldMap._WALL_PERCENTAGE):
+        for block in range(int(height * width * WorldMap._WALL_PERCENTAGE)):
             block_x = randrange(height)
             block_y = randrange(width)
             self.tiles[block_x][block_y] = MapTile.BLOCKED

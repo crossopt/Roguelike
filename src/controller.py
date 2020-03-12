@@ -19,7 +19,15 @@ class Controller(object):
         self.view = None
 
     def run_loop(self):
-        with tcod.console_init_root(80, 60, vsync=True, order='C') as root_console:
+        tcod.console_set_custom_font(
+            "big_font.png",
+            tcod.FONT_LAYOUT_ASCII_INROW | tcod.FONT_TYPE_GREYSCALE,
+            16,
+            16,
+        )
+
+        self.model.map.generate(10, 10)
+        with tcod.console_init_root(10, 10, vsync=True, order='C') as root_console:
             self.view = view.View(root_console)
             
             while self.isAppRunning:
