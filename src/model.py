@@ -12,7 +12,7 @@ class Model(object):
     """ Class encapsulating the state of the game world. """
     def __init__(self):
         self.map = world_map.WorldMap()
-        self.player = fighter.Fighter(world_map.Position(0, 0))
+        self.player = fighter.Fighter(world_map.get_player_start())
 
     def set_player_will(self, will):
         self.player.set_intention(will)
