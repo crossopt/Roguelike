@@ -3,8 +3,8 @@
 import tcod
 from tcod.console import Console
 
-import model as package_model
-import world_map
+from src.model import Model
+from src.world_map import MapTile
 
 wall_color = tcod.white
 path_color = tcod.black
@@ -12,8 +12,8 @@ player_color = tcod.yellow
 text_color = tcod.grey
 
 tile_to_bg = {
-    world_map.MapTile.BLOCKED: wall_color,
-    world_map.MapTile.EMPTY: path_color
+    MapTile.BLOCKED: wall_color,
+    MapTile.EMPTY: path_color
 }
 
 
@@ -23,7 +23,7 @@ class View:
         self.console.default_bg = wall_color
         self.console.default_fg = text_color
 
-    def draw(self, model: package_model.Model):
+    def draw(self, model: Model):
         self.console.clear()
         for i in range(model.map.height):
             for j in range(model.map.width):
