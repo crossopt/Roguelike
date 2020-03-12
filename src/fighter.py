@@ -15,16 +15,16 @@ class Fighter(object):
         self.position = new_position
 
     def set_intention(self, will):
-    	self.intention = will
+        self.intention = will
 
 
     def choose_move(self, world_map):
 
         if self.intention == model.Will.STAY:
-        	dx, dy = 0, 0
+            dx, dy = 0, 0
         elif self.intention == model.Will.MOVE_UP:
-        	dx, dy = -1, 0
+            dx, dy = -1, 0
 
         intentable_position = map.
-       	if True: # can move, ideally, ask map
-       		return 
+        if True: # can move, ideally, ask map
+            return 

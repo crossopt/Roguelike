@@ -14,10 +14,10 @@ class Model(object):
         self.player = fighter.Fighter(Position(0, 0))
 
     def set_player_will(self, will):
-    	self.player.set_intention(will)
+        self.player.set_intention(will)
 
 
 class Will(Enum):
 
-	STAY = 0
-	MOVE_UP = 1
+    STAY = 0
+    MOVE_UP = 1
