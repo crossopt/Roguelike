@@ -5,18 +5,21 @@ sys.path.append(".")
 
 from src.model import Model
 from src.view import View
+
+import tcod
 import tcod.event
 
 class Controller(object):
 
-    def __init__(self, view):
-        self.view = View()
+    def __init__(self):
         self.model = Model()
         self.isAppRunning = True
 
     def run_loop(self):
-        for event in tcod.event.wait():
-            print(event.type) 
+        with tcod.console_init_root(80, 60, order='F') as root_console:
+            self.view = View(root_console)
+            for event in tcod.event.wait():
+                print(event.type)
 
 
 
