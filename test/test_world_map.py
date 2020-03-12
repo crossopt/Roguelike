@@ -34,7 +34,7 @@ class TestWorldMap(unittest.TestCase):
     def testComponentChecking_oneComponent(self):
         self.assertTrue(WorldMap._is_one_component(self.no_block_map))
         self.assertTrue(WorldMap._is_one_component(self.valid_map))
-        self.assertFalse(WorldMap._is_one_component(self.almost_all_block_map))
+        self.assertTrue(WorldMap._is_one_component(self.almost_all_block_map))
 
     def testComponentChecking_notOneComponent(self):
         self.assertFalse(WorldMap._is_one_component(self.disconnected_map))

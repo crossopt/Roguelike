@@ -126,7 +126,7 @@ class WorldMap(object):
             return 0 <= x < len(was_visited) and 0 <= y < len(was_visited[x])
 
         def _dfs(x, y):
-            if not _is_valid_tile(x, y) or was_visited[x][y]:
+            if _is_valid_tile(x, y) and not was_visited[x][y]:
                 was_visited[x][y] = True
                 for dx, dy in {(0, 1), (0, -1), (1, 0), (-1, 0)}:
                     _dfs(x + dx, y + dy)
