@@ -20,12 +20,15 @@ TILE_TO_BG = {
 
 
 class View:
+    """ Class responsible for displaying a view of the game world state to the user. """
     def __init__(self, root_console: Console):
+        """ Initializes a View that will display to the given console. """
         self.console = root_console
         self.console.default_bg = WALL_COLOR
         self.console.default_fg = TEXT_COLOR
 
     def draw(self, model: Model):
+        """ Displays the current state of the given Model. """
         self.console.clear()
         for i in range(model.map.height):
             for j in range(model.map.width):

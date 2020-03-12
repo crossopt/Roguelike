@@ -1,4 +1,5 @@
 """ Module containing the implementation of various in-game fighters. """
+
 from enum import Enum
 
 from src import world_map

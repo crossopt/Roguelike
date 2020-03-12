@@ -51,6 +51,7 @@ class Controller:
                     if event.type == 'QUIT':
                         self.program_is_running = False
                         break
+
                     if event.type == 'KEYDOWN':
                         if event.repeat:
                             continue
