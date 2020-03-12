@@ -25,6 +25,8 @@ class Controller(object):
             16,
             16,
         )
+
+        self.model.map.generate(10, 10)
         with tcod.console_init_root(10, 10, vsync=True, order='C') as root_console:
             self.view = view.View(root_console)
             
