@@ -10,10 +10,13 @@ from src import world_map
 
 
 class Controller:
+    _DEFAULT_MAP_WIDTH = 10
+    _DEFAULT_MAP_HEIGHT = 10
+
     def __init__(self):
-        wmap = world_map.WorldMap()
-        wmap.generate(10, 10)
-        self.model = model.Model(wmap, wmap.get_player_start())
+        game_map = world_map.WorldMap()
+        game_map.generate(Controller._DEFAULT_MAP_HEIGHT, Controller._DEFAULT_MAP_WIDTH)
+        self.model = model.Model(game_map, game_map.get_player_start())
         self.program_is_running = True
         self.view = None
 
@@ -35,27 +38,22 @@ class Controller:
                 self.model.set_player_intention(src.fighter.FighterIntention.STAY)
 
                 for event in tcod.event.wait():
-                    print(event.type)
-
-                    if event.type == 'QUIT':
+                    if event.type == "QUIT":
                         self.program_is_running = False
                         break
-
-                    if event.type == 'KEYDOWN':
+                    
+                    if event.type == "KEYDOWN":
                         if event.repeat:
                             continue
-
-                        print(event.scancode, event.mod)
                         self.dispatch(event.scancode, event.mod)
 
-                wmap = self.model.map
-                tiles = wmap.tiles
+                game_map = self.model.map
+                tiles = game_map.tiles
                 fighters = self.model.get_fighters()
 
                 for fighter in fighters:
-                    print(fighter, fighter.position.x, fighter.position.y)
                     intended_position = fighter.choose_move(world_map)
-                    if wmap.is_on_map(intended_position) and \
+                    if game_map.is_on_map(intended_position) and \
                             tiles[intended_position.x][intended_position.y] == world_map.MapTile.EMPTY:
                         fighter.move(intended_position)
 
