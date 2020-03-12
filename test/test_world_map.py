@@ -87,12 +87,12 @@ class TestWorldMap(unittest.TestCase):
 
     def testLoad_badBoard(self):
         with self.assertRaises(MapParsingException) as raised:
-            WorldMap().load('resources/invalid_board')
+            WorldMap().load('test/resources/invalid_board')
         self.assertEqual('Line does not match width: ..', str(raised.exception))
 
     def testLoad_correctBoard(self):
         world_map = WorldMap()
-        world_map.load('resources/valid_board')
+        world_map.load('test/resources/valid_board')
         self.assertListEqual(self.valid_map, world_map.tiles)
 
     def testIsOnMap(self):

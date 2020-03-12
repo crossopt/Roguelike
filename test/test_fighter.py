@@ -19,23 +19,23 @@ class TestMove(unittest.TestCase):
         self.assertEqual(2, self.fighter.position.y)
 
     def testMove_intentions(self):
-        self.fighter.set_intention(fighter.Will.STAY)
+        self.fighter.set_intention(fighter.FighterIntention.STAY)
         self.assertEqual(0, self.fighter.choose_move(self.map).x)
         self.assertEqual(0, self.fighter.choose_move(self.map).y)
 
-        self.fighter.set_intention(fighter.Will.MOVE_UP)
+        self.fighter.set_intention(fighter.FighterIntention.MOVE_UP)
         self.assertEqual(-1, self.fighter.choose_move(self.map).x)
         self.assertEqual(0, self.fighter.choose_move(self.map).y)
 
-        self.fighter.set_intention(fighter.Will.MOVE_LEFT)
+        self.fighter.set_intention(fighter.FighterIntention.MOVE_LEFT)
         self.assertEqual(0, self.fighter.choose_move(self.map).x)
         self.assertEqual(-1, self.fighter.choose_move(self.map).y)
 
-        self.fighter.set_intention(fighter.Will.MOVE_DOWN)
+        self.fighter.set_intention(fighter.FighterIntention.MOVE_DOWN)
         self.assertEqual(1, self.fighter.choose_move(self.map).x)
         self.assertEqual(0, self.fighter.choose_move(self.map).y)
 
-        self.fighter.set_intention(fighter.Will.MOVE_RIGHT)
+        self.fighter.set_intention(fighter.FighterIntention.MOVE_RIGHT)
         self.assertEqual(0, self.fighter.choose_move(self.map).x)
         self.assertEqual(1, self.fighter.choose_move(self.map).y)
 
