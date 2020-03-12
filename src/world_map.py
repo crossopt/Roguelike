@@ -34,7 +34,7 @@ class MapTile(Enum):
                 'X': MapTile.BLOCKED}.get(char, MapTile.INVALID)
 
 
-class Map(object):
+class WorldMap(object):
     """ Class for storing the world map. """
     _WALL_PERCENTAGE = 0.4
 
@@ -50,11 +50,11 @@ class Map(object):
         self.width = width
         self.tiles = [[MapTile.EMPTY for i in range(self.width)] for j in range(self.height)]
 
-        for block in range(height * width * Map._WALL_PERCENTAGE):
+        for block in range(height * width * WorldMap._WALL_PERCENTAGE):
             block_x = randrange(height)
             block_y = randrange(width)
             self.tiles[block_x][block_y] = MapTile.BLOCKED
-            if not Map._is_one_component(self.tiles):
+            if not WorldMap._is_one_component(self.tiles):
                 self.tiles[block_x][block_y] = MapTile.EMPTY
 
     def load(self, file_name):
@@ -70,15 +70,11 @@ class Map(object):
         """
         try:
             with open(file_name, 'r') as fin:
-                lines = Map._trim_lines(fin.readlines())
-                converted_tiles = Map._convert_to_tiles(lines)
-
-                if not Map._is_one_component(converted_tiles):
-                    raise MapParsingException('Map is not a connected component')
+                lines = WorldMap._trim_lines(fin.readlines())
+                converted_tiles = WorldMap._convert_to_tiles(lines)
                 self.height = len(lines)
                 self.width = len(lines[0])
                 self.tiles = converted_tiles
-
         except IOError as exception:
             raise MapParsingException(exception)
 
@@ -111,10 +107,12 @@ class Map(object):
                     raise MapParsingException('Invalid symbol {} in line {}'.format(symbol, string))
                 converted_string.append(converted_symbol)
             converted_tiles.append(converted_string)
+        if not WorldMap._is_one_component(converted_tiles):
+            raise MapParsingException('WorldMap is not a connected component')
         return converted_tiles
 
     @staticmethod
-    def _is_one_component(tile_map):
+    def _is_one_component(world_map):
         """ Checks whether the passed map contains one connected component.
 
         Returns True if all of the empty tiles are reachable from any empty tile
