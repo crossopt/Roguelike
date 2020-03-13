@@ -47,7 +47,10 @@ class WorldMap:
         self.tiles = [[MapTile.EMPTY for i in range(self.width)] for j in range(self.height)]
 
     def get_player_start(self):
-        """ Returns a starting position for the player: the first free tile. """
+        """
+        Returns a starting position for the player: the first free tile,
+        or None if no free tile was found.
+        """
         for x, y in product(range(self.height), range(self.width)):
             if self.tiles[x][y] == MapTile.EMPTY:
                 return Position(x, y)
