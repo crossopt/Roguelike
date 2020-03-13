@@ -3,13 +3,14 @@
 from enum import Enum
 from random import randrange
 from itertools import product
+from dataclasses import dataclass
 
 
+@dataclass
 class Position:
     """ Class for storing the position of various objects on the map. """
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    x: int
+    y: int
 
 
 class MapParsingException(Exception):
