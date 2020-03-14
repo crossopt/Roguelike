@@ -17,7 +17,7 @@ class Controller:
     _DEFAULT_MAP_WIDTH = 10
     _DEFAULT_MAP_HEIGHT = 10
 
-    _TILESET_PATH = 'big_font.png'
+    _TILESET_PATH = 'medium_font.png'
     _TILESET_OPTIONS = tcod.FONT_LAYOUT_ASCII_INROW | tcod.FONT_TYPE_GREYSCALE
     _TILESET_HORIZONTAL = 16
     _TILESET_VERTICAL = 16
