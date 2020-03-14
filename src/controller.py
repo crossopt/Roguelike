@@ -49,8 +49,6 @@ class Controller:
                 self.view.draw(self.model)
                 tcod.console_flush()
 
-                self.model.set_player_intention(src.fighter.FighterIntention.STAY)
-
                 for event in tcod.event.wait():
                     if event.type == 'QUIT':
                         self.program_is_running = False
@@ -82,4 +80,4 @@ class Controller:
                              tcod.event.SCANCODE_S: src.fighter.FighterIntention.MOVE_DOWN,
                              tcod.event.SCANCODE_D: src.fighter.FighterIntention.MOVE_RIGHT}
         if code in code_to_intention:
-            self.model.set_player_intention(code_to_intention[code])
+            self.model.add_player_intention(code_to_intention[code])

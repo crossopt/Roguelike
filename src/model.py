@@ -1,6 +1,7 @@
 """ Module containing the world logic for the game. """
 
 from src import fighter
+from src.fighter import FighterIntention
 from src.world_map import Position
 from src.world_map import WorldMap
 
@@ -12,9 +13,9 @@ class Model:
         self.map = initial_map
         self.player = fighter.Fighter(player_start)
 
-    def set_player_intention(self, intention):
+    def add_player_intention(self, intention: FighterIntention):
         """ Sets the player's intended move to the given one. """
-        self.player.set_intention(intention)
+        self.player.add_intention(intention)
 
     def get_fighters(self):
         """ Returns a list of the fighters currently present in the game. """
