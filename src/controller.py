@@ -1,5 +1,7 @@
 """ Module containing the main controller logic for the game. """
 
+from argparse import ArgumentParser
+
 import tcod
 import tcod.event
 
@@ -7,7 +9,7 @@ import src.fighter
 from src import model
 from src import view
 from src import world_map
-from src.world_map import RandomV1WorldMapSource
+from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
 
 
 class Controller:
@@ -20,13 +22,18 @@ class Controller:
     _TILESET_HORIZONTAL = 16
     _TILESET_VERTICAL = 16
 
-    _WINDOW_HEIGTH = 10
-    _WINDOW_WIDTH = 10
-
     def __init__(self):
         """ Initializes the game controller so it is ready to start a new game. """
-        game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
-                                          Controller._DEFAULT_MAP_WIDTH).get()
+        parser = ArgumentParser()
+        parser.add_argument('map_path', type=str, nargs='?')
+
+        args = parser.parse_args()
+
+        if args.map_path is not None:
+            game_map = FileWorldMapSource(args.map_path).get()
+        else:
+            game_map = RandomV1WorldMapSource(10, 10).get()
+
         self.model = model.Model(game_map, game_map.get_player_start())
         self.program_is_running = True
         self.view = None
@@ -40,8 +47,8 @@ class Controller:
             Controller._TILESET_VERTICAL,
         )
 
-        with tcod.console_init_root(Controller._WINDOW_WIDTH,
-                                    Controller._WINDOW_HEIGTH,
+        with tcod.console_init_root(self.model.map.width,
+                                    self.model.map.height,
                                     vsync=True, order='C') as root_console:
             self.view = view.View(root_console)
 
