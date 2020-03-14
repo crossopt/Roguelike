@@ -49,6 +49,7 @@ class WorldMap:
 
     @classmethod
     def from_tiles(cls, tiles: List[List[MapTile]]):
+        """ Builds a world map from the given tiles. """
         height = len(tiles)
         width = len(tiles[0])
         game_map = WorldMap(height, width)
@@ -95,10 +96,11 @@ class WorldMap:
 
 
 class WorldMapSource(ABC):
-    """ Base class for map loaders/generators """
+    """ Base class for map loaders/generators. """
 
     @abstractmethod
     def get(self) -> WorldMap:
+        """ Produces a world map. """
         pass
 
 
