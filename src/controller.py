@@ -32,7 +32,8 @@ class Controller:
         if args.map_path is not None:
             game_map = FileWorldMapSource(args.map_path).get()
         else:
-            game_map = RandomV1WorldMapSource(10, 10).get()
+            game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
+                                              Controller._DEFAULT_MAP_WIDTH).get()
 
         self.model = model.Model(game_map, game_map.get_player_start())
         self.program_is_running = True
