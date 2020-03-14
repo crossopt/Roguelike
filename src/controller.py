@@ -7,6 +7,7 @@ import src.fighter
 from src import model
 from src import view
 from src import world_map
+from src.world_map import RandomV1WorldMapSource
 
 
 class Controller:
@@ -24,8 +25,8 @@ class Controller:
 
     def __init__(self):
         """ Initializes the game controller so it is ready to start a new game. """
-        game_map = world_map.WorldMap()
-        game_map.generate(Controller._DEFAULT_MAP_HEIGHT, Controller._DEFAULT_MAP_WIDTH)
+        game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
+                                          Controller._DEFAULT_MAP_WIDTH).get()
         self.model = model.Model(game_map, game_map.get_player_start())
         self.program_is_running = True
         self.view = None
@@ -67,7 +68,7 @@ class Controller:
                 for fighter in fighters:
                     intended_position = fighter.choose_move(world_map)
                     if game_map.is_on_map(intended_position) and \
-                            tiles[intended_position.x][intended_position.y] == world_map.MapTile.EMPTY:
+                       tiles[intended_position.x][intended_position.y] == world_map.MapTile.EMPTY:
                         fighter.move(intended_position)
 
     def dispatch(self, code, _mod):

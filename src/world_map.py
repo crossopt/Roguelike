@@ -1,9 +1,10 @@
 """ Module containing the implementation of the map generation and storage. """
-
+from abc import ABC, abstractmethod
 from enum import Enum
 from random import randrange
 from itertools import product
 from dataclasses import dataclass
+from typing import List, Iterable
 
 
 @dataclass
@@ -24,7 +25,7 @@ class MapTile(Enum):
     INVALID = 2
 
     @staticmethod
-    def parse(char):
+    def parse(char: str):
         """ Converts a character to the corresponding enum.
 
         '.' is an empty space on the map, 'X' a blocked space.
@@ -38,14 +39,21 @@ class MapTile(Enum):
 
 class WorldMap:
     """ Class for storing the world map. """
-    _WALL_PERCENTAGE = 0.4
     _DEFAULT_MAP_SIZE = 10
 
-    def __init__(self):
+    def __init__(self, height: int = _DEFAULT_MAP_SIZE, width: int = _DEFAULT_MAP_SIZE):
         """ Generates a default map example. """
-        self.height = WorldMap._DEFAULT_MAP_SIZE
-        self.width = WorldMap._DEFAULT_MAP_SIZE
-        self.tiles = [[MapTile.EMPTY for i in range(self.width)] for j in range(self.height)]
+        self.height = height
+        self.width = width
+        self.tiles = [[MapTile.EMPTY for _ in range(self.width)] for _ in range(self.height)]
+
+    @classmethod
+    def from_tiles(cls, tiles: List[List[MapTile]]):
+        height = len(tiles)
+        width = len(tiles[0])
+        game_map = WorldMap(height, width)
+        game_map.tiles = tiles
+        return game_map
 
     def get_player_start(self):
         """
@@ -57,65 +65,82 @@ class WorldMap:
                 return Position(x, y)
         return None
 
-    def generate(self, height, width):
-        """ Randomly generates a map of size height x width.
-
-        :raises ValueError if height or width are incorrect.
-        """
-        if height <= 0:
-            raise ValueError('Invalid map height')
-        if width <= 0:
-            raise ValueError('Invalid map width')
-        self.height = height
-        self.width = width
-        self.tiles = [[MapTile.EMPTY for i in range(self.width)] for j in range(self.height)]
-
-        for block in range(int(height * width * WorldMap._WALL_PERCENTAGE)):
-            block_x = randrange(height)
-            block_y = randrange(width)
-            self.tiles[block_x][block_y] = MapTile.BLOCKED
-            if not WorldMap._is_one_component(self.tiles):
-                self.tiles[block_x][block_y] = MapTile.EMPTY
-
-    def load(self, file_name):
-        """ Loads a map from the given file.
-
-        The file should contain a height x width board (height rows with width board symbols in each).
-        A board symbol is one of '.' for an empty tile, 'X' for a blocked tile.
-        The empty tiles should all be reachable from any empty tile on the board.
-
-        If the map loading fails and an exception is thrown the old map is left unmodified.
-
-        :raises MapParsingException if the file's contents could not be parsed into a valid map.
-        """
-        try:
-            with open(file_name, 'r') as fin:
-                lines = WorldMap._trim_lines(fin.readlines())
-                converted_tiles = WorldMap._convert_to_tiles(lines)
-                self.height = len(lines)
-                self.width = len(lines[0])
-                self.tiles = converted_tiles
-        except IOError as exception:
-            raise MapParsingException(exception)
-
-    def is_on_map(self, position):
+    def is_on_map(self, position: Position):
         """ Returns True if the given position exists on the map, False otherwise. """
         return 0 <= position.x < self.height and 0 <= position.y < self.width
 
+    def is_one_component(self) -> bool:
+        """ Checks whether the map contains one connected component.
+
+        :returns True if all of the empty tiles are reachable from any empty tile
+        on the given map, or False otherwise.
+        """
+        was_visited = list(map(lambda x: list(map(lambda y: y != MapTile.EMPTY, x)), self.tiles))
+
+        def _is_valid_tile(x, y):
+            return 0 <= x < len(was_visited) and 0 <= y < len(was_visited[x])
+
+        def _dfs(x, y):
+            if _is_valid_tile(x, y) and not was_visited[x][y]:
+                was_visited[x][y] = True
+                for dx, dy in {(0, 1), (0, -1), (1, 0), (-1, 0)}:
+                    _dfs(x + dx, y + dy)
+
+        component_amount = 0
+        for x, y in product(range(len(self.tiles)), range(max(map(len, self.tiles)))):
+            if not was_visited[x][y]:
+                _dfs(x, y)
+                component_amount += 1
+        return component_amount == 1
+
+
+class WorldMapSource(ABC):
+    """ Base class for map loaders/generators """
+
+    @abstractmethod
+    def get(self) -> WorldMap:
+        pass
+
+
+class FileWorldMapSource(WorldMapSource):
+    """ Loads a map from the given file.
+
+    The file should contain a height x width board (height rows with width board symbols in each).
+    A board symbol is one of '.' for an empty tile, 'X' for a blocked tile.
+    The empty tiles should all be reachable from any empty tile on the board.
+
+    If the map loading fails and an exception is thrown the old map is left unmodified.
+    """
+
+    def __init__(self, file_name: str):
+        self.file_name = file_name
+
+    def get(self) -> WorldMap:
+        """
+        :raises MapParsingException if the file's contents could not be parsed into a valid map.
+        """
+        try:
+            with open(self.file_name, 'r') as fin:
+                lines = FileWorldMapSource._trim_lines(fin.readlines())
+                game_map = WorldMap.from_tiles(FileWorldMapSource._convert_to_tiles(lines))
+                if not game_map.is_one_component():
+                    raise MapParsingException('Map is not a connected component')
+        except IOError as exception:
+            raise MapParsingException(exception)
+        return game_map
+
     @staticmethod
-    def _trim_lines(lines):
+    def _trim_lines(lines: Iterable[str]):
         """ Removes excess empty symbols from lines before their conversion to a map. """
         return list(filter(lambda x: x != '', map(lambda x: x.strip(), lines)))
 
     @staticmethod
-    def _convert_to_tiles(string_list):
+    def _convert_to_tiles(string_list: List[str]) -> List[List[MapTile]]:
         """ Converts a list of strings containing a board to a MapTile 2d array.
 
         Fails if the string list is empty, if the board widths are inconsistent,
         if the strings contain invalid symbols or if the resulting map is not a
         single connected component.
-
-        :raises MapParsingException if the string list encodes an invalid board.
         """
         if len(string_list) <= 0:
             raise MapParsingException('Invalid map height')
@@ -131,31 +156,30 @@ class WorldMap:
                     raise MapParsingException('Invalid symbol {} in line {}'.format(symbol, string))
                 converted_string.append(converted_symbol)
             converted_tiles.append(converted_string)
-        if not WorldMap._is_one_component(converted_tiles):
-            raise MapParsingException('Map is not a connected component')
         return converted_tiles
 
-    @staticmethod
-    def _is_one_component(world_map):
-        """ Checks whether the passed map contains one connected component.
 
-        :returns True if all of the empty tiles are reachable from any empty tile
-        on the given map, or False otherwise.
-        """
-        was_visited = list(map(lambda x: list(map(lambda y: y != MapTile.EMPTY, x)), world_map))
+class RandomV1WorldMapSource(WorldMapSource):
+    """ Randomly generates a map of size height x width. """
+    _WALL_PERCENTAGE = 0.4
 
-        def _is_valid_tile(x, y):
-            return 0 <= x < len(was_visited) and 0 <= y < len(was_visited[x])
+    def __init__(self, height: int, width: int) -> None:
+        """ :raises ValueError if height or width are incorrect. """
+        if height <= 0:
+            raise ValueError('Invalid map height')
+        if width <= 0:
+            raise ValueError('Invalid map width')
+        self.height = height
+        self.width = width
 
-        def _dfs(x, y):
-            if _is_valid_tile(x, y) and not was_visited[x][y]:
-                was_visited[x][y] = True
-                for dx, dy in {(0, 1), (0, -1), (1, 0), (-1, 0)}:
-                    _dfs(x + dx, y + dy)
+    def get(self) -> WorldMap:
+        game_map = WorldMap(self.height, self.width)
 
-        component_amount = 0
-        for x, y in product(range(len(world_map)), range(max(map(len, world_map)))):
-            if not was_visited[x][y]:
-                _dfs(x, y)
-                component_amount += 1
-        return component_amount == 1
+        for _ in range(int(self.height * self.width * RandomV1WorldMapSource._WALL_PERCENTAGE)):
+            block_x = randrange(self.height)
+            block_y = randrange(self.width)
+            game_map.tiles[block_x][block_y] = MapTile.BLOCKED
+            if not game_map.is_one_component():
+                game_map.tiles[block_x][block_y] = MapTile.EMPTY
+
+        return game_map
