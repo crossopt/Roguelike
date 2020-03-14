@@ -24,8 +24,8 @@ class Controller:
 
     def __init__(self):
         """ Initializes the game controller so it is ready to start a new game. """
-        parser = ArgumentParser()
-        parser.add_argument('map_path', type=str, nargs='?')
+        parser = ArgumentParser(description='A simple console-based rogue-like game.')
+        parser.add_argument('map_path', type=str, nargs='?', help='path to map file to load')
 
         args = parser.parse_args()
 
