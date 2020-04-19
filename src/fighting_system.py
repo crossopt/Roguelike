@@ -1,5 +1,8 @@
 """ Module containing the details of the fighting system used by in-game characters. """
-from src.fighter import Fighter, Mob
+from src.fighter import Fighter, Mob, Player
+import random
+
+CONFUSION_TIME = 5
 
 
 class CoolFightingSystem:
@@ -10,3 +13,7 @@ class CoolFightingSystem:
         if isinstance(attacker, Mob) and isinstance(defender, Mob):
             return
         defender.take_damage(attacker.get_attack())
+        if isinstance(attacker, Player) and \
+           isinstance(defender, Mob) and\
+           random.random() < attacker.get_confusion_prob():
+            defender.become_confused(CONFUSION_TIME)

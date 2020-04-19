@@ -1,15 +1,18 @@
 """ Module containing the implementation of various in-game fighters. """
 from abc import abstractmethod, ABC
 from enum import Enum
+from typing import List
 
 import src.model
 import src.world_map
 import src.strategies
+from src.weapon import Weapon
 
 PLAYER_HP = 20
 MOB_HP = 10
 PLAYER_BASE_ATTACK = 2
-MOB_ATTACK = 1
+MOB_ATTACK = 4
+ITEM_COUNT = 3
 
 
 class PlayerIntention(Enum):
@@ -52,13 +55,14 @@ class Fighter(ABC):
 class Player(Fighter):
     """ Class for storing the player-controlled fighter character. """
 
-    def get_attack(self) -> int:
-        return PLAYER_BASE_ATTACK + self.get_additional_attack()
-
-    def __init__(self, position: 'src.model.Position', hp: int = PLAYER_HP):
+    def __init__(self, position: 'src.model.Position', inventory: List[Weapon] = None, used_weapon = None, hp: int = PLAYER_HP):
         """ Initializes a player character with the given initial position. """
         super(Player, self).__init__(position)
         self.hp = hp
+        if inventory is None:
+            inventory = []
+        self.inventory = inventory
+        self.used_weapon = used_weapon
         self._intentions = []
 
     def _add_intention(self, new_intention: PlayerIntention):
@@ -79,7 +83,15 @@ class Player(Fighter):
         commands = dict()
         for cmd_name, intention in cmd_name_to_intention.items():
             commands[cmd_name] = lambda intention=intention: self._add_intention(intention)
+        for i in range(ITEM_COUNT):
+            commands['select_' + str(i+1)] = lambda i=i: self._select_weapon(i)
         return commands
+
+    def _select_weapon(self, num):
+        if self.used_weapon == num:
+            self.used_weapon = None
+        else:
+            self.used_weapon = num
 
     def choose_move(self, _current_model: 'src.model.Model'):
         """ Chooses a move for the player based on the current intentions. """
@@ -98,8 +110,32 @@ class Player(Fighter):
         chosen_position = src.world_map.Position(self.position.x + dx, self.position.y + dy)
         return chosen_position
 
+    def get_attack(self) -> int:
+        return self.get_base_attack() + self.get_additional_attack()
+
+    def get_base_attack(self) -> int:
+        return PLAYER_BASE_ATTACK
+
+    def take_damage(self, damage: int) -> None:
+        super(Player, self).take_damage(max(0, damage - self.get_defence()))
+
     def get_additional_attack(self):
-        return 0  # TODO
+        if self.used_weapon is not None:
+            return self.inventory[self.used_weapon].attack
+        else:
+            return 0
+
+    def get_defence(self):
+        if self.used_weapon is not None:
+            return self.inventory[self.used_weapon].defence
+        else:
+            return 0
+
+    def get_confusion_prob(self):
+        if self.used_weapon is not None:
+            return self.inventory[self.used_weapon].confusion_prob
+        else:
+            return 0
 
 
 class Mob(Fighter):
@@ -113,6 +149,9 @@ class Mob(Fighter):
 
     def get_attack(self) -> int:
         return MOB_ATTACK
+
+    def become_confused(self, time: int):
+        self.fighting_strategy = src.strategies.ConfusedStrategy(self.fighting_strategy, time)
 
     def choose_move(self, current_model: 'src.model.Model'):
         """ Chooses a move for the mob based on its strategy. """

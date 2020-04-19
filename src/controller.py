@@ -13,6 +13,7 @@ from src import model
 from src import view
 from src.fighting_system import CoolFightingSystem
 from src.view import TOTAL_WIDTH, TOTAL_HEIGHT
+from src.weapon import WeaponBuilder
 from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
 
 
@@ -30,23 +31,39 @@ class Controller:
         """ Initializes the game controller so it is ready to start a new game. """
         parser = ArgumentParser(description='A simple console-based rogue-like game.')
         parser.add_argument('map_path', type=str, nargs='?', help='path to map file to load')
-        parser.add_argument('--new_game', nargs='?', dest='new_game_demanded', const=True, default=False)
+        parser.add_argument('--new_game', nargs='?', dest='new_game_demanded', const=True,
+                            default=False)
 
         args = parser.parse_args()
 
         no_save_file = not os.path.isfile('save')
 
-        if args.new_game_demanded or no_save_file:        
+        if args.new_game_demanded or no_save_file:
             if args.map_path is not None:
                 game_map = FileWorldMapSource(args.map_path).get()
             else:
                 game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
                                                   Controller._DEFAULT_MAP_WIDTH).get()
-                
+
             mobs_count = 5
             positions = game_map.get_random_empty_positions(mobs_count + 1)
-            player = src.fighter.Player(positions[0])
-            mobs = [src.fighter.Mob(positions[i], src.strategies.AggressiveStrategy()) for i in range(1, mobs_count + 1)]
+            player = src.fighter.Player(positions[0], [WeaponBuilder()
+                                        .with_name("SABER")
+                                        .with_attack(2)
+                                        .with_defence(2)
+                                        .with_confusion_prob(0.2),
+                                                       WeaponBuilder()
+                                        .with_name("SPEAR")
+                                        .with_attack(4)
+                                        .with_defence(1)
+                                        .with_confusion_prob(0.1),
+                                                       WeaponBuilder()
+                                        .with_name("SWORD")
+                                        .with_attack(1)
+                                        .with_defence(3)
+                                        .with_confusion_prob(0.7)])
+            mobs = [src.fighter.Mob(positions[i], src.strategies.AggressiveStrategy()) for i in
+                    range(1, mobs_count + 1)]
 
             self.model = model.Model(game_map, player, mobs)
         else:
@@ -111,7 +128,7 @@ class Controller:
                 fighter.position = intended_position
 
         if self.model.player.hp == 0:
-            pass # TODO game over
+            pass  # TODO game over
         mobs = []
         for mob in self.model.mobs:
             if mob.hp > 0:
@@ -128,6 +145,9 @@ class Controller:
         code_to_cmd = {tcod.event.SCANCODE_W: commands['go_up'],
                        tcod.event.SCANCODE_A: commands['go_left'],
                        tcod.event.SCANCODE_S: commands['go_down'],
-                       tcod.event.SCANCODE_D: commands['go_right']}
+                       tcod.event.SCANCODE_D: commands['go_right'],
+                       tcod.event.SCANCODE_1: commands['select_1'],
+                       tcod.event.SCANCODE_2: commands['select_2'],
+                       tcod.event.SCANCODE_3: commands['select_3']}
         if code in code_to_cmd:
             code_to_cmd[code]()

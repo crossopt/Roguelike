@@ -5,6 +5,7 @@ from tcod.console import Console
 
 from src.fighter import MOB_HP
 from src.model import Model
+from src.strategies import ConfusedStrategy
 from src.world_map import Position
 
 WALL_COLOR = tcod.grey
@@ -16,9 +17,9 @@ HUD_COLOR = tcod.black
 
 ORD_SMILEY = 1
 
-VIEW_HEIGHT = 9
-VIEW_WIDTH = 9
-HUD_WIDTH = 7
+VIEW_HEIGHT = 13
+VIEW_WIDTH = 13
+HUD_WIDTH = 8
 TOTAL_WIDTH = VIEW_WIDTH + HUD_WIDTH
 TOTAL_HEIGHT = VIEW_HEIGHT
 
@@ -42,7 +43,12 @@ class View:
             for j in range(VIEW_WIDTH):
                 self.console.bg[i, j] = PATH_COLOR if model.map.is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
         for mob in model.mobs:
-            self.set_position(mob.position, offset, ch=ORD_SMILEY, fg=(50 + int(mob.hp / MOB_HP * 200), 0, 0))
+            intensity = 50 + int(mob.hp / MOB_HP * 200)
+            if isinstance(mob.fighting_strategy, ConfusedStrategy):
+                color = (0, intensity, 0)
+            else:
+                color = (intensity, 0, 0)
+            self.set_position(mob.position, offset, ch=ORD_SMILEY, fg=color)
         self.set_position(model.player.position, offset, ch=ORD_SMILEY, fg=PLAYER_COLOR)
 
         # draw HUD
@@ -51,7 +57,13 @@ class View:
             for j in range(VIEW_WIDTH, VIEW_WIDTH + HUD_WIDTH):
                 self.console.bg[i, j] = HUD_COLOR
 
-        self.console.print(VIEW_WIDTH, 0, 'HP ' + str(model.player.hp))
+        self.console.print(VIEW_WIDTH, 0, 'HP  ' + str(model.player.hp))
+        self.console.print(VIEW_WIDTH, 1, 'ATK ' + str(model.player.get_base_attack()) + '+' + str(model.player.get_additional_attack()))
+        self.console.print(VIEW_WIDTH, 2, 'DEF ' + str(model.player.get_defence()))
+        self.console.print(VIEW_WIDTH, 4, 'ITEMS:')
+        for i in range(len(model.player.inventory)):
+            start = '*' if i == model.player.used_weapon else ' '
+            self.console.print(VIEW_WIDTH, 5 + i, start + model.player.inventory[i].name)
 
     def set_position(self, pos, offset, ch=None, fg=None, bg=None):
         pos_pair = pos.x + offset[0], pos.y + offset[1]
