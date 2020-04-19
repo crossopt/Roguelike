@@ -48,8 +48,8 @@ class View:
                 color = (0, intensity, 0)
             else:
                 color = (intensity, 0, 0)
-            self.set_position(mob.position, offset, ch=ORD_SMILEY, fg=color)
-        self.set_position(model.player.position, offset, ch=ORD_SMILEY, fg=PLAYER_COLOR)
+            self._draw_character(mob.position, offset, ch=ORD_SMILEY, fg=color)
+        self._draw_character(model.player.position, offset, ch=ORD_SMILEY, fg=PLAYER_COLOR)
 
         # draw HUD
 
@@ -65,7 +65,7 @@ class View:
             start = '*' if i == model.player.used_weapon else ' '
             self.console.print(VIEW_WIDTH, 5 + i, start + model.player.inventory[i].name)
 
-    def set_position(self, pos, offset, ch=None, fg=None, bg=None):
+    def _draw_character(self, pos, offset, ch=None, fg=None, bg=None):
         pos_pair = pos.x + offset[0], pos.y + offset[1]
         if pos_pair[0] < 0 or pos_pair[0] >= VIEW_HEIGHT or\
            pos_pair[1] < 0 or pos_pair[1] >= VIEW_WIDTH:

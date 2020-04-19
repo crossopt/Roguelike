@@ -100,7 +100,8 @@ class ConfusedStrategy(FightingStrategy):
 
     @staticmethod
     def choose_move(current_model: 'src.model.Model', mob: 'src.fighter.Mob'):
-        return choice(current_model.map.get_empty_neighbors(mob.position))
+        neighbours = current_model.map.get_empty_neighbors(mob.position)
+        return choice(neighbours)
 
     def update_strategy(self):
         self.confusion_time -= 1

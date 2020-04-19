@@ -10,7 +10,7 @@ from src.model import Model
 class TestFighters(unittest.TestCase):
     def setUp(self):
         self.player = fighter.Player(Position(0, 0))
-        self.mob = fighter.Mob(Position(2, 2), PassiveStrategy)
+        self.mob = fighter.Mob(Position(2, 2), PassiveStrategy())
         self.model = Model(world_map.WorldMap(), self.player, [self.mob])
 
     def testGetAttack(self):

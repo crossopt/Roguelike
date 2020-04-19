@@ -155,5 +155,6 @@ class Mob(Fighter):
 
     def choose_move(self, current_model: 'src.model.Model'):
         """ Chooses a move for the mob based on its strategy. """
+        chosen_move = self.fighting_strategy.choose_move(current_model, self)
         self.fighting_strategy = self.fighting_strategy.update_strategy()
-        return self.fighting_strategy.choose_move(current_model, self)
+        return chosen_move
