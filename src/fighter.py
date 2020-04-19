@@ -88,6 +88,7 @@ class Player(Fighter):
         return commands
 
     def _select_weapon(self, num):
+        """ Sets the weapon being used to the chosen weapon. """
         if self.used_weapon == num:
             self.used_weapon = None
         else:
@@ -111,27 +112,31 @@ class Player(Fighter):
         return chosen_position
 
     def get_attack(self) -> int:
-        return self.get_base_attack() + self.get_additional_attack()
+        return self._get_base_attack() + self._get_additional_attack()
 
-    def get_base_attack(self) -> int:
+    def _get_base_attack(self) -> int:
+        """ Returns the player's base attack strength. """
         return PLAYER_BASE_ATTACK
 
     def take_damage(self, damage: int) -> None:
-        super(Player, self).take_damage(max(0, damage - self.get_defence()))
+        super(Player, self).take_damage(max(0, damage - self._get_defence()))
 
-    def get_additional_attack(self):
+    def _get_additional_attack(self):
+        """ Returns the delta added to the player's attack strength from their weapons. """
         if self.used_weapon is not None:
             return self.inventory[self.used_weapon].attack
         else:
             return 0
 
-    def get_defence(self):
+    def _get_defence(self):
+        """ Returns the delta added to the player's defence from their weapons. """
         if self.used_weapon is not None:
             return self.inventory[self.used_weapon].defence
         else:
             return 0
 
     def get_confusion_prob(self):
+        """ Returns the probability with which the player's attack confuses the defendant. """
         if self.used_weapon is not None:
             return self.inventory[self.used_weapon].confusion_prob
         else:
@@ -151,6 +156,7 @@ class Mob(Fighter):
         return MOB_ATTACK
 
     def become_confused(self, time: int):
+        """ The mob becomes confused for a chosen amount of ticks. """
         self.fighting_strategy = src.strategies.ConfusedStrategy(self.fighting_strategy, time)
 
     def choose_move(self, current_model: 'src.model.Model'):
