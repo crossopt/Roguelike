@@ -2,6 +2,7 @@ import unittest
 
 from src import fighter
 from src import world_map
+from src.strategies import PassiveStrategy
 from src.world_map import Position
 from src.model import Model
 
@@ -9,7 +10,7 @@ from src.model import Model
 class TestFighters(unittest.TestCase):
     def setUp(self):
         self.player = fighter.Player(Position(0, 0))
-        self.mob = fighter.Player(Position(2, 2))
+        self.mob = fighter.Mob(Position(2, 2), PassiveStrategy)
         self.model = Model(world_map.WorldMap(), self.player, [self.mob])
 
     def testGetAttack(self):
@@ -23,9 +24,9 @@ class TestFighters(unittest.TestCase):
         self.player.take_damage(500)
         self.assertEqual(0, self.player.hp)
         self.assertEqual(fighter.MOB_HP, self.mob.hp)
-        self.player.take_damage(1)
+        self.mob.take_damage(1)
         self.assertEqual(fighter.MOB_HP - 1, self.mob.hp)
-        self.player.take_damage(10)
+        self.mob.take_damage(10)
         self.assertEqual(0, self.mob.hp)
 
     def testMove_initial_zero(self):

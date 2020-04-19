@@ -59,14 +59,13 @@ class WorldMap:
         return game_map
 
     def get_random_empty_positions(self, count=1):
-        """ Returns a random empty position on the map. """
+        """ Returns a list of random empty positions (possibly repeating) on the map of length count. """
         positions = []
-        for i in range(count):
-            while True:
-                position = Position(random.randrange(0, self.height), random.randrange(0, self.width))
-                if self.is_empty(position) and position not in positions:
-                    positions.append(position)
-                    break
+        while len(positions) < count:
+            position = Position(random.randrange(0, self.height), random.randrange(0, self.width))
+            if self.is_empty(position) and position not in positions:
+                positions.append(position)
+                break
         return positions
 
     def is_empty(self, position: Position):

@@ -38,19 +38,17 @@ class TestWorldMap(unittest.TestCase):
         self.assertFalse(world_map.is_on_map(Position(-1, 0)))
         self.assertFalse(world_map.is_on_map(Position(10, 0)))
 
-    def testGetPlayerStart_startInZero(self):
-        mocked_map = WorldMap.from_tiles(self.no_block_map)
-        self.assertEqual(0, mocked_map.get_player_start().x)
-        self.assertEqual(0, mocked_map.get_player_start().y)
+    def testRandomEmptyPositions(self):
+        pass
 
-    def testGetPlayerStart_startNotInZero(self):
-        mocked_map = WorldMap.from_tiles(self.one_tile_map)
-        self.assertEqual(1, mocked_map.get_player_start().x)
-        self.assertEqual(1, mocked_map.get_player_start().y)
+    def testIsEmpty(self, position: Position):
+        pass
 
-    def testGetPlayerStart_nonexistentStart(self):
-        mocked_map = WorldMap.from_tiles(self.all_block_map)
-        self.assertIsNone(mocked_map.get_player_start())
+    def testGetDistance(self):
+        pass
+
+    def testGetEmptyNeighbors(self):
+        pass
 
 
 class TestRandomV1WorldMapSource(unittest.TestCase):
