@@ -81,11 +81,16 @@ class Controller:
         tiles = game_map.tiles
         fighters = self.model.get_fighters()
 
+        moves = []
+
         for fighter in fighters:
             intended_position = fighter.choose_move(self.model)
             if game_map.is_on_map(intended_position) and \
                 tiles[intended_position.x][intended_position.y] == world_map.MapTile.EMPTY:
-                fighter.move(intended_position)
+                moves.append((fighter, intended_position))
+
+        for who, where in moves:
+            who.move(where)
 
 
     def dispatch(self, code, _mod, commands):
