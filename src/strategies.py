@@ -19,6 +19,13 @@ class FightingStrategy:
         """ Selects a move for a given mob based on the state of the model world. """
         raise NotImplementedError()
 
+    def update_strategy(self):
+        """
+        Is called once per move choice.
+        Returns a strategy that is updated with the new time and move choice.
+        """
+        return self
+
 
 class AggressiveStrategy(FightingStrategy):
     """ An aggressive strategy that always moves towards the player and attacks them. """
@@ -59,6 +66,15 @@ class PassiveStrategy(FightingStrategy):
 
 class ConfusedStrategy(FightingStrategy):
     """ Strategy for a mob that has been confused. """
+    def __init__(self, original_strategy: FightingStrategy, confusion_time: int):
+        """ Creates a strategy that moves randomly confusion_time ticks. """
+        self.original_strategy = original_strategy
+        self.confusion_time = confusion_time
+
     @staticmethod
     def choose_move(current_model: 'src.model.Model', mob: 'src.fighter.Mob'):
         return choice(current_model.map.get_empty_neighbors(mob.position))
+
+    def update_strategy(self):
+        self.confusion_time -= 1
+        return self if self.confusion_time else self.original_strategy
