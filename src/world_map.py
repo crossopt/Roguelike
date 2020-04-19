@@ -80,7 +80,7 @@ class WorldMap:
     def get_empty_neighbors(self, position: Position):
         """ Returns list of positions of empty tiles at manhattan distance 1. """
         empty_neighbors = []
-        for dx, dy in {(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)}:
+        for dx, dy in {(0, 1), (0, -1), (1, 0), (-1, 0)}:
             neighbor = Position(position.x + dx, position.y + dy)
             if self.is_empty(neighbor):
                 empty_neighbors.append(neighbor)

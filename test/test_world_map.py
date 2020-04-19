@@ -39,16 +39,31 @@ class TestWorldMap(unittest.TestCase):
         self.assertFalse(world_map.is_on_map(Position(10, 0)))
 
     def testRandomEmptyPositions(self):
-        pass
+        world_map = WorldMap.from_tiles(self.one_tile_map)
+        positions = world_map.get_random_empty_positions(5)
+        self.assertEqual(5, len(positions))
+        for position in positions:
+            self.assertEqual(position, Position(1, 1))
 
-    def testIsEmpty(self, position: Position):
-        pass
+    def testIsEmpty(self):
+        world_map = WorldMap.from_tiles(self.valid_map)
+        self.assertFalse(world_map.is_empty(Position(-1, 0)))
+        self.assertFalse(world_map.is_empty(Position(2, 0)))
+        self.assertFalse(world_map.is_empty(Position(0, 2)))
+        self.assertTrue(world_map.is_empty(Position(1, 0)))
+        self.assertTrue(world_map.is_empty(Position(1, 1)))
 
     def testGetDistance(self):
-        pass
+        self.assertEqual(0, WorldMap.get_distance(Position(3, 3), Position(3, 3)))
+        self.assertEqual(27, WorldMap.get_distance(Position(3, 3), Position(3, 30)))
+        self.assertEqual(10, WorldMap.get_distance(Position(3, 3), Position(10, 0)))
 
     def testGetEmptyNeighbors(self):
-        pass
+        world_map = WorldMap.from_tiles(self.valid_map)
+        self.assertEqual(world_map.get_empty_neighbors(Position(0, 0)),
+                         [Position(0, 1), Position(1, 0)])
+        self.assertEqual(world_map.get_empty_neighbors(Position(1, 0)),
+                         [Position(1, 1), Position(0, 0)])
 
 
 class TestRandomV1WorldMapSource(unittest.TestCase):
