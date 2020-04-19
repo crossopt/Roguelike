@@ -40,8 +40,8 @@ class TestWorldMap(unittest.TestCase):
 
     def testRandomEmptyPositions(self):
         world_map = WorldMap.from_tiles(self.one_tile_map)
-        positions = world_map.get_random_empty_positions(5)
-        self.assertEqual(5, len(positions))
+        positions = world_map.get_random_empty_positions(2)
+        self.assertEqual(2, len(positions))
         for position in positions:
             self.assertEqual(position, Position(1, 1))
 
