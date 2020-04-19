@@ -3,6 +3,7 @@
 import tcod
 from tcod.console import Console
 
+from src.fighter import MOB_HP
 from src.model import Model
 from src.world_map import MapTile
 
@@ -35,7 +36,7 @@ class View:
             for j in range(model.map.width):
                 self.console.bg[i, j] = TILE_TO_BG[model.map.tiles[i][j]]
         for mob in model.mobs:
-            self.set_position(mob.position, ch=ORD_SMILEY, fg=MOB_COLOR)
+            self.set_position(mob.position, ch=ORD_SMILEY, fg=(50 + int(mob.hp * 1.0 / MOB_HP * 200), 0, 0))
         self.set_position(model.player.position, ch=ORD_SMILEY, fg=PLAYER_COLOR)
 
     def set_position(self, pos, ch=None, fg=None, bg=None):

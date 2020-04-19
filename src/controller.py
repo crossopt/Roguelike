@@ -38,9 +38,11 @@ class Controller:
         else:
             game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
                                               Controller._DEFAULT_MAP_WIDTH).get()
-            
-        player = src.fighter.Player(game_map.get_random_empty_position())
-        mobs = [src.fighter.Mob(game_map.get_random_empty_position(), src.strategies.AggressiveStrategy())]
+
+        mobs_count = 3
+        positions = game_map.get_random_empty_positions(mobs_count + 1)
+        player = src.fighter.Player(positions[0])
+        mobs = [src.fighter.Mob(positions[i], src.strategies.AggressiveStrategy()) for i in range(1, mobs_count + 1)]
 
         self.model = model.Model(game_map, player, mobs)
         self.program_is_running = True

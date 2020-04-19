@@ -58,12 +58,16 @@ class WorldMap:
         game_map.tiles = tiles
         return game_map
 
-    def get_random_empty_position(self):
+    def get_random_empty_positions(self, count=1):
         """ Returns a random empty position on the map. """
-        while True:
-            position = Position(random.randrange(0, self.height), random.randrange(0, self.width))
-            if self.is_empty(position):
-                return position
+        positions = []
+        for i in range(count):
+            while True:
+                position = Position(random.randrange(0, self.height), random.randrange(0, self.width))
+                if self.is_empty(position) and position not in positions:
+                    positions.append(position)
+                    break
+        return positions
 
     def is_empty(self, position: Position):
         """ Checks whether a tile on the map is empty. """
