@@ -11,7 +11,7 @@ WALL_COLOR = tcod.grey
 PATH_COLOR = tcod.black
 PLAYER_COLOR = tcod.yellow
 MOB_COLOR = tcod.red
-TEXT_COLOR = tcod.grey
+TEXT_COLOR = tcod.white
 HUD_COLOR = tcod.black
 
 ORD_SMILEY = 1
@@ -41,12 +41,17 @@ class View:
         for i in range(VIEW_HEIGHT):
             for j in range(VIEW_WIDTH):
                 self.console.bg[i, j] = PATH_COLOR if model.map.is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
-        for i in range(VIEW_HEIGHT):
-            for j in range(VIEW_WIDTH, VIEW_WIDTH + HUD_WIDTH):
-                self.console.bg[i, j] = HUD_COLOR
         for mob in model.mobs:
             self.set_position(mob.position, offset, ch=ORD_SMILEY, fg=(50 + int(mob.hp / MOB_HP * 200), 0, 0))
         self.set_position(model.player.position, offset, ch=ORD_SMILEY, fg=PLAYER_COLOR)
+
+        # draw HUD
+
+        for i in range(VIEW_HEIGHT):
+            for j in range(VIEW_WIDTH, VIEW_WIDTH + HUD_WIDTH):
+                self.console.bg[i, j] = HUD_COLOR
+
+        self.console.print(VIEW_WIDTH, 0, 'HP ' + str(model.player.hp))
 
     def set_position(self, pos, offset, ch=None, fg=None, bg=None):
         pos_pair = pos.x + offset[0], pos.y + offset[1]
