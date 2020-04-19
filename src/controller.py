@@ -7,13 +7,10 @@ from typing import List
 import tcod
 import tcod.event
 
-<<<<<<< HEAD
 import os
 
 import random
 
-=======
->>>>>>> 60f73703a3c3c4157875d2b663973f1175e256ee
 import src.fighter
 import src.strategies
 from src import model
@@ -50,24 +47,17 @@ class Controller:
                 game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
                                                   Controller._DEFAULT_MAP_WIDTH).get()
                 
-            player = src.fighter.Player(game_map.get_random_empty_position())
-            mobs = [src.fighter.Mob(game_map.get_random_empty_position(), src.strategies.AggressiveStrategy())]
+            mobs_count = 5
+            positions = game_map.get_random_empty_positions(mobs_count + 1)
+            player = src.fighter.Player(positions[0])
+            mobs = [src.fighter.Mob(positions[i], src.strategies.AggressiveStrategy()) for i in range(1, mobs_count + 1)]
 
             self.model = model.Model(game_map, player, mobs)
         else:
-<<<<<<< HEAD
             with open('save.save', 'rb') as file:
                 self.model = model.Model(None, None, None)
                 self.model.set_snapshot(file)
-=======
-            game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
-                                              Controller._DEFAULT_MAP_WIDTH).get()
 
-        mobs_count = 5
-        positions = game_map.get_random_empty_positions(mobs_count + 1)
-        player = src.fighter.Player(positions[0])
-        mobs = [src.fighter.Mob(positions[i], src.strategies.AggressiveStrategy()) for i in range(1, mobs_count + 1)]
->>>>>>> 60f73703a3c3c4157875d2b663973f1175e256ee
 
         self.program_is_running = True
         self.view = None
