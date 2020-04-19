@@ -1,9 +1,15 @@
 """ Module containing the implementation of various in-game fighters. """
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from enum import Enum
 
 import src.model
 import src.world_map
+
+
+PLAYER_HP = 20
+MOB_HP    = 10
+PLAYER_BASE_ATTACK = 2
+MOB_ATTACK = 1
 
 
 class PlayerIntention(Enum):
@@ -15,15 +21,24 @@ class PlayerIntention(Enum):
     MOVE_RIGHT = 4
 
 
-class Fighter:
+class Fighter(ABC):
     """ Class for storing the various in-game fighter characters. """
     def __init__(self, initial_position: 'src.model.Position'):
         """ Initializes a fighter with the given initial position. """
         self.position = initial_position
+        self.hp       = None
 
     def move(self, new_position: 'src.model.Position'):
         """ Changes the fighter's position. """
         self.position = new_position
+
+    def deal_damage(self, damage: int) -> None:
+        damage = min(damage, self.hp)
+        self.hp -= damage
+
+    @abstractmethod
+    def get_attack(self) -> int:
+        pass
 
     @abstractmethod
     def choose_move(self, current_model: 'src.model.Model'):
@@ -33,9 +48,14 @@ class Fighter:
 
 class Player(Fighter):
     """ Class for storing the player-controlled fighter character. """
+
+    def get_attack(self) -> int:
+        return PLAYER_BASE_ATTACK + self.get_additional_attack()
+
     def __init__(self, initial_position: 'src.model.Position'):
         """ Initializes a player character with the given initial position. """
         super(Player, self).__init__(initial_position)
+        self.hp = PLAYER_HP
         self.intentions = []
 
     def _add_intention(self, new_intention: PlayerIntention):
@@ -75,12 +95,20 @@ class Player(Fighter):
         chosen_position = src.world_map.Position(self.position.x + dx, self.position.y + dy)
         return chosen_position
 
+    def get_additional_attack(self):
+        return 0 # TODO
+
 
 class Mob(Fighter):
     """ Class for storing NPC mobs. """
+
+    def get_attack(self) -> int:
+        return MOB_ATTACK
+
     def __init__(self, initial_position: 'src.model.Position', fighting_strategy):
         """ Initializes a mob with the given initial position and fighting strategy. """
         super(Mob, self).__init__(initial_position)
+        self.hp = MOB_HP
         self.fighting_strategy = fighting_strategy
 
     def choose_move(self, current_model: 'src.model.Model'):

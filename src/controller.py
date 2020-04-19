@@ -5,8 +5,11 @@ from argparse import ArgumentParser
 import tcod
 import tcod.event
 
+import random
+
 import src.fighter
 import src.strategies
+from src.fighting_system import CoolFightingSystem
 from src import model
 from src import view
 from src import world_map
@@ -42,6 +45,7 @@ class Controller:
         self.model = model.Model(game_map, player, mobs)
         self.program_is_running = True
         self.view = None
+        self.fighting_system = CoolFightingSystem()
 
     def run_loop(self):
         """ Starts a new game and runs it until the user quits the game. """
@@ -78,22 +82,30 @@ class Controller:
 
     def tick(self):
         game_map = self.model.map
-        tiles = game_map.tiles
         fighters = self.model.get_fighters()
 
-        moves = []
+        random.shuffle(fighters)
 
         for fighter in fighters:
             intended_position = fighter.choose_move(self.model)
-            if game_map.is_on_map(intended_position) and \
-                tiles[intended_position.x][intended_position.y] == world_map.MapTile.EMPTY:
-                moves.append((fighter, intended_position))
+            if not game_map.is_empty(intended_position):
+                intended_position = fighter.position
+            target = self.model.get_fighter_at(intended_position)
+            if target is not None and intended_position != fighter.position:
+                self.fighting_system.fight(fighter, target)
+            if target is None:
+                fighter.position = intended_position
 
-        for who, where in moves:
-            who.move(where)
+        if self.model.player.hp == 0:
+            pass # TODO game over
+        mobs = []
+        for mob in self.model.mobs:
+            if mob.hp > 0:
+                mobs.append(mob)
+        self.model.mobs = mobs
 
-
-    def dispatch(self, code, _mod, commands):
+    @staticmethod
+    def dispatch(code, _mod, commands):
         """ Handles the user's key down presses and sets the relevant intentions for a player.
 
         :param code: a scancode of the main key pressed.
