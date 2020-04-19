@@ -64,10 +64,15 @@ class WorldMap:
     def get_random_empty_positions(self, count=1):
         """ Returns a list of random empty positions (possibly repeating) on the map of length count. """
         positions = []
-        while len(positions) < count:
-            position = Position(random.randrange(0, self.height), random.randrange(0, self.width))
-            if self.is_empty(position) and position not in positions:
-                positions.append(position)
+        empty = []
+        for i in range(self.height):
+            for j in range(self.width):
+                if self.tiles[i][j] == MapTile.EMPTY:
+                    empty.append((i,j))
+        for i in range(count):
+            p = random.randrange(0, len(empty))
+            positions.append(empty[p])
+            empty.pop(p)
         return positions
 
     def is_empty(self, position: Position):
