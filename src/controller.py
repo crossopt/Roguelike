@@ -16,11 +16,14 @@ from src.view import TOTAL_WIDTH, TOTAL_HEIGHT
 from src.weapon import WeaponBuilder
 from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
 
+SAVE_FILE_NAME = 'save'
+
 
 class Controller:
     """ The class responsible for controlling the main game flow. """
     _DEFAULT_MAP_WIDTH = 30
     _DEFAULT_MAP_HEIGHT = 30
+    _MOB_COUNT = 8
 
     _TILESET_PATH = 'fonts/medium_font.png'
     _TILESET_OPTIONS = tcod.FONT_LAYOUT_ASCII_INROW | tcod.FONT_TYPE_GREYSCALE
@@ -36,7 +39,7 @@ class Controller:
 
         args = parser.parse_args()
 
-        no_save_file = not os.path.isfile('save')
+        no_save_file = not os.path.isfile(SAVE_FILE_NAME)
 
         if args.new_game_demanded or no_save_file:
             if args.map_path is not None:
@@ -45,20 +48,20 @@ class Controller:
                 game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
                                                   Controller._DEFAULT_MAP_WIDTH).get()
 
-            mobs_count = 5
+            mobs_count = Controller._MOB_COUNT
             positions = game_map.get_random_empty_positions(mobs_count + 1)
             player = src.fighter.Player(positions[0], [WeaponBuilder()
-                                        .with_name("SABER")
+                                        .with_name('SABER')
                                         .with_attack(2)
                                         .with_defence(2)
                                         .with_confusion_prob(0.2),
                                                        WeaponBuilder()
-                                        .with_name("SPEAR")
+                                        .with_name('SPEAR')
                                         .with_attack(4)
                                         .with_defence(1)
                                         .with_confusion_prob(0.1),
                                                        WeaponBuilder()
-                                        .with_name("SWORD")
+                                        .with_name('SWORD')
                                         .with_attack(1)
                                         .with_defence(3)
                                         .with_confusion_prob(0.7)])
@@ -67,12 +70,13 @@ class Controller:
 
             self.model = model.Model(game_map, player, mobs)
         else:
-            with open('save', 'r') as file:
+            with open(SAVE_FILE_NAME, 'r') as file:
                 self.model = model.Model(None, None, None)
                 self.model.set_snapshot(file.read())
 
         self.program_is_running = True
         self.view = None
+        self.player_died = False
         self.fighting_system = CoolFightingSystem()
 
     def run_loop(self):
@@ -105,11 +109,18 @@ class Controller:
                             continue
                         self._dispatch(event.scancode, event.mod, commands)
 
+                if not self.program_is_running:
+                    break
+
                 while self.model.player.has_intention():
                     self._tick()
 
-            with open('save', 'w') as file:
-                file.write(self.model.get_snapshot())
+            if self.player_died:
+                if os.path.isfile(SAVE_FILE_NAME):
+                    os.remove(SAVE_FILE_NAME)
+            else:
+                with open(SAVE_FILE_NAME, 'w') as file:
+                    file.write(self.model.get_snapshot())
 
     def _tick(self):
         game_map = self.model.map
@@ -127,8 +138,9 @@ class Controller:
             if target is None:
                 fighter.position = intended_position
 
-        if self.model.player.hp == 0:
-            pass  # TODO game over
+        if self.model.player.hp <= 0:
+            self.program_is_running = False
+            self.player_died = True
         mobs = []
         for mob in self.model.mobs:
             if mob.hp > 0:
