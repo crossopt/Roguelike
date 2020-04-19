@@ -5,9 +5,8 @@ from enum import Enum
 import src.model
 import src.world_map
 
-
 PLAYER_HP = 20
-MOB_HP    = 10
+MOB_HP = 10
 PLAYER_BASE_ATTACK = 2
 MOB_ATTACK = 1
 
@@ -23,10 +22,11 @@ class PlayerIntention(Enum):
 
 class Fighter(ABC):
     """ Class for storing the various in-game fighter characters. """
+
     def __init__(self, initial_position: 'src.model.Position'):
         """ Initializes a fighter with the given initial position. """
         self.position = initial_position
-        self.hp       = None
+        self.hp = None
 
     def move(self, new_position: 'src.model.Position'):
         """ Changes the fighter's position. """
@@ -46,10 +46,11 @@ class Fighter(ABC):
     def choose_move(self, current_model: 'src.model.Model'):
         """ Selects a move based on the state of the model world. """
         raise NotImplementedError()
-        
+
 
 class Player(Fighter):
     """ Class for storing the player-controlled fighter character. """
+
     def get_attack(self) -> int:
         return PLAYER_BASE_ATTACK + self.get_additional_attack()
 
@@ -97,7 +98,7 @@ class Player(Fighter):
         return chosen_position
 
     def get_additional_attack(self):
-        return 0 # TODO
+        return 0  # TODO
 
 
 class Mob(Fighter):

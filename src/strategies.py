@@ -11,6 +11,32 @@ def sign(x):
     return x and (1, -1)[x < 0]
 
 
+def strategy_serializer(obj, **_kwargs):
+    if isinstance(obj, AggressiveStrategy):
+        return {'type': 'aggressive'}
+    if isinstance(obj, CowardlyStrategy):
+        return {'type': 'cowardly'}
+    if isinstance(obj, PassiveStrategy):
+        return {'type': 'passive'}
+    if isinstance(obj, ConfusedStrategy):
+        return {'type': 'confused',
+                'original': strategy_serializer(obj.original_strategy),
+                'confusion_time': obj.confusion_time}
+    return None
+
+
+def strategy_deserializer(obj, **_kwargs):
+    if obj['type'] == 'aggressive':
+        return AggressiveStrategy()
+    if obj['type'] == 'cowardly':
+        return CowardlyStrategy()
+    if obj['type'] == 'passive':
+        return PassiveStrategy()
+    if obj['type'] == 'confused':
+        return ConfusedStrategy(strategy_deserializer(obj['original'], cls=FightingStrategy), obj['confusion_time'])
+    return None
+
+
 class FightingStrategy:
     """ The base class for all fighting strategies for mobs. """
     @staticmethod

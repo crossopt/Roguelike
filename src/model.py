@@ -1,9 +1,14 @@
 """ Module containing the world logic for the game. """
 
 import jsons
+
 # import copy
 import src.fighter
+from src.strategies import FightingStrategy, strategy_deserializer, strategy_serializer
 from src.world_map import WorldMap, Position
+
+jsons.set_serializer(strategy_serializer, FightingStrategy)
+jsons.set_deserializer(strategy_deserializer, FightingStrategy)
 
 
 class Model:
@@ -16,7 +21,6 @@ class Model:
 
     def get_fighters(self):
         """ Returns a list of the fighters currently present in the game. """
-        print(self.get_snapshot())
         return [self.player] + self.mobs
 
     def get_snapshot(self):
