@@ -1,6 +1,7 @@
 """ Module containing the details of the fighting system used by in-game characters. """
-from src.fighter import Fighter, Mob, Player
 import random
+
+from src.fighter import Fighter, Mob, Player
 
 CONFUSION_TIME = 5
 

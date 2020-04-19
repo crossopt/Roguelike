@@ -1,9 +1,9 @@
 """ Module containing strategies for various types of mobs. """
 
-import src.model
-
 from abc import abstractmethod
 from random import choice
+
+import src.model
 
 
 def sign(x):

@@ -55,7 +55,8 @@ class Fighter(ABC):
 class Player(Fighter):
     """ Class for storing the player-controlled fighter character. """
 
-    def __init__(self, position: 'src.model.Position', inventory: List[Weapon] = None, used_weapon = None, hp: int = PLAYER_HP):
+    def __init__(self, position: 'src.model.Position', inventory: List[Weapon] = None,
+                 used_weapon=None, hp: int = PLAYER_HP):
         """ Initializes a player character with the given initial position. """
         super(Player, self).__init__(position)
         self.hp = hp
@@ -84,7 +85,7 @@ class Player(Fighter):
         for cmd_name, intention in cmd_name_to_intention.items():
             commands[cmd_name] = lambda intention=intention: self._add_intention(intention)
         for i in range(ITEM_COUNT):
-            commands['select_' + str(i+1)] = lambda i=i: self._select_weapon(i)
+            commands['select_' + str(i + 1)] = lambda i=i: self._select_weapon(i)
         return commands
 
     def _select_weapon(self, num):
@@ -112,41 +113,39 @@ class Player(Fighter):
         return chosen_position
 
     def get_attack(self) -> int:
-        return self._get_base_attack() + self._get_additional_attack()
+        return self.get_base_attack() + self.get_additional_attack()
 
-    def _get_base_attack(self) -> int:
+    def get_base_attack(self) -> int:
         """ Returns the player's base attack strength. """
         return PLAYER_BASE_ATTACK
 
     def take_damage(self, damage: int) -> None:
-        super(Player, self).take_damage(max(0, damage - self._get_defence()))
+        super(Player, self).take_damage(max(0, damage - self.get_defence()))
 
-    def _get_additional_attack(self):
+    def get_additional_attack(self):
         """ Returns the delta added to the player's attack strength from their weapons. """
         if self.used_weapon is not None:
             return self.inventory[self.used_weapon].attack
-        else:
-            return 0
+        return 0
 
-    def _get_defence(self):
+    def get_defence(self):
         """ Returns the delta added to the player's defence from their weapons. """
         if self.used_weapon is not None:
             return self.inventory[self.used_weapon].defence
-        else:
-            return 0
+        return 0
 
     def get_confusion_prob(self):
         """ Returns the probability with which the player's attack confuses the defendant. """
         if self.used_weapon is not None:
             return self.inventory[self.used_weapon].confusion_prob
-        else:
-            return 0
+        return 0
 
 
 class Mob(Fighter):
     """ Class for storing NPC mobs. """
 
-    def __init__(self, position: 'src.model.Position', fighting_strategy: 'src.strategies.FightingStrategy', hp: int = MOB_HP):
+    def __init__(self, position: 'src.model.Position',
+                 fighting_strategy: 'src.strategies.FightingStrategy', hp: int = MOB_HP):
         """ Initializes a mob with the given initial position and fighting strategy. """
         super(Mob, self).__init__(position)
         self.hp = hp

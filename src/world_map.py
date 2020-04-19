@@ -68,7 +68,7 @@ class WorldMap:
         for i in range(self.height):
             for j in range(self.width):
                 if self.tiles[i][j] == MapTile.EMPTY:
-                    empty.append(Position(i,j))
+                    empty.append(Position(i, j))
         for i in range(count):
             p = random.randrange(0, len(empty))
             positions.append(empty[p])
@@ -128,7 +128,6 @@ class WorldMapSource(ABC):
     @abstractmethod
     def get(self) -> WorldMap:
         """ Produces a world map. """
-        pass
 
 
 class FileWorldMapSource(WorldMapSource):

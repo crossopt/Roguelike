@@ -42,3 +42,4 @@ class Model:
         for fighter in self.get_fighters():
             if fighter.position == pos:
                 return fighter
+        return None

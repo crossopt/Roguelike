@@ -58,8 +58,8 @@ class View:
                 self.console.bg[i, j] = HUD_COLOR
 
         self.console.print(VIEW_WIDTH, 0, 'HP  ' + str(model.player.hp))
-        self.console.print(VIEW_WIDTH, 1, 'ATK ' + str(model.player._get_base_attack()) + '+' + str(model.player._get_additional_attack()))
-        self.console.print(VIEW_WIDTH, 2, 'DEF ' + str(model.player._get_defence()))
+        self.console.print(VIEW_WIDTH, 1, 'ATK ' + str(model.player.get_base_attack()) + '+' + str(model.player.get_additional_attack()))
+        self.console.print(VIEW_WIDTH, 2, 'DEF ' + str(model.player.get_defence()))
         self.console.print(VIEW_WIDTH, 4, 'ITEMS:')
         for i in range(len(model.player.inventory)):
             start = '*' if i == model.player.used_weapon else ' '
