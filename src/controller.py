@@ -86,15 +86,15 @@ class Controller:
                     if event.type == 'KEYDOWN':
                         if event.repeat:
                             continue
-                        self.dispatch(event.scancode, event.mod, commands)
+                        self._dispatch(event.scancode, event.mod, commands)
 
                 while self.model.player.has_intention():
-                    self.tick()
+                    self._tick()
 
             with open('save', 'w') as file:
                 file.write(self.model.get_snapshot())
 
-    def tick(self):
+    def _tick(self):
         game_map = self.model.map
         fighters = self.model.get_fighters()
 
@@ -119,11 +119,12 @@ class Controller:
         self.model.mobs = mobs
 
     @staticmethod
-    def dispatch(code, _mod, commands):
+    def _dispatch(code, _mod, commands):
         """ Handles the user's key down presses and sets the relevant intentions for a player.
 
         :param code: a scancode of the main key pressed.
         :param _mod: a modifier, a mask of the functional keys pressed with the main one.
+        :param commands: a list of commands to which the key presses match.
         """
         code_to_cmd = {tcod.event.SCANCODE_W: commands['go_up'],
                        tcod.event.SCANCODE_A: commands['go_left'],

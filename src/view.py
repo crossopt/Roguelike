@@ -42,8 +42,8 @@ class View:
             for j in range(VIEW_WIDTH):
                 self.console.bg[i, j] = PATH_COLOR if model.map.is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
         for mob in model.mobs:
-            self.set_position(mob.position, offset, ch=ORD_SMILEY, fg=(50 + int(mob.hp / MOB_HP * 200), 0, 0))
-        self.set_position(model.player.position, offset, ch=ORD_SMILEY, fg=PLAYER_COLOR)
+            self._draw_character(mob.position, offset, ch=ORD_SMILEY, fg=(50 + int(mob.hp / MOB_HP * 200), 0, 0))
+        self._draw_character(model.player.position, offset, ch=ORD_SMILEY, fg=PLAYER_COLOR)
 
         # draw HUD
 
@@ -53,7 +53,7 @@ class View:
 
         self.console.print(VIEW_WIDTH, 0, 'HP ' + str(model.player.hp))
 
-    def set_position(self, pos, offset, ch=None, fg=None, bg=None):
+    def _draw_character(self, pos, offset, ch=None, fg=None, bg=None):
         pos_pair = pos.x + offset[0], pos.y + offset[1]
         if pos_pair[0] < 0 or pos_pair[0] >= VIEW_HEIGHT or\
            pos_pair[1] < 0 or pos_pair[1] >= VIEW_WIDTH:
