@@ -1,6 +1,7 @@
 """ Module containing the world logic for the game. """
 
-import jsons
+from typing import List, Tuple, Iterable
+import pickle
 # import copy
 import src.fighter
 from src.world_map import WorldMap, Position
@@ -8,7 +9,7 @@ from src.world_map import WorldMap, Position
 
 class Model:
     """ Class encapsulating the state of the game world. """
-    def __init__(self, initial_map: WorldMap, player: 'src.fighter.Player', mobs: 'List[src.fighter.Mob]'):
+    def __init__(self, initial_map: WorldMap=None, player: 'src.fighter.Player'=None, mobs: 'List[src.fighter.Mob]'=None):
         """ Initializes a model with a given initial map, player and list of current mobs. """
         self.map = initial_map
         self.player = player
@@ -20,10 +21,10 @@ class Model:
         return [self.player] + self.mobs
 
     def get_snapshot(self):
-        return jsons.dumps(self)
+        return pickle.dumps(self)
 
-    def set_snapshot(self, data):
-        instance = jsons.load(data, Model)
+    def set_snapshot(self, file):
+        instance = pickle.load(file)
         self.map = instance.map
         self.player = instance.player
         self.mobs = instance.mobs

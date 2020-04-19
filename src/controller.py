@@ -2,9 +2,14 @@
 
 import random
 from argparse import ArgumentParser
+from typing import List
 
 import tcod
 import tcod.event
+
+import os
+
+import random
 
 import src.fighter
 import src.strategies
@@ -29,21 +34,31 @@ class Controller:
         """ Initializes the game controller so it is ready to start a new game. """
         parser = ArgumentParser(description='A simple console-based rogue-like game.')
         parser.add_argument('map_path', type=str, nargs='?', help='path to map file to load')
+        parser.add_argument('--new_game', nargs='?', dest='new_game_demanded', const=True, default=False)
 
         args = parser.parse_args()
 
-        if args.map_path is not None:
-            game_map = FileWorldMapSource(args.map_path).get()
+        no_save_file = not os.path.isfile('save.save')
+
+        if args.new_game_demanded or no_save_file:        
+            if args.map_path is not None:
+                game_map = FileWorldMapSource(args.map_path).get()
+            else:
+                game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
+                                                  Controller._DEFAULT_MAP_WIDTH).get()
+                
+            mobs_count = 5
+            positions = game_map.get_random_empty_positions(mobs_count + 1)
+            player = src.fighter.Player(positions[0])
+            mobs = [src.fighter.Mob(positions[i], src.strategies.AggressiveStrategy()) for i in range(1, mobs_count + 1)]
+
+            self.model = model.Model(game_map, player, mobs)
         else:
-            game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
-                                              Controller._DEFAULT_MAP_WIDTH).get()
+            with open('save.save', 'rb') as file:
+                self.model = model.Model(None, None, None)
+                self.model.set_snapshot(file)
 
-        mobs_count = 5
-        positions = game_map.get_random_empty_positions(mobs_count + 1)
-        player = src.fighter.Player(positions[0])
-        mobs = [src.fighter.Mob(positions[i], src.strategies.AggressiveStrategy()) for i in range(1, mobs_count + 1)]
 
-        self.model = model.Model(game_map, player, mobs)
         self.program_is_running = True
         self.view = None
         self.fighting_system = CoolFightingSystem()
@@ -80,6 +95,9 @@ class Controller:
 
                 while self.model.player.has_intention():
                     self.tick()
+
+            with open('save.save', 'wb') as file:
+                file.write(self.model.get_snapshot())
 
     def tick(self):
         game_map = self.model.map
