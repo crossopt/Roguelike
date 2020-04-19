@@ -3,14 +3,13 @@
 import jsons
 # import copy
 import src.fighter
-from src.world_map import Position
-from src.world_map import WorldMap
+from src.world_map import WorldMap, Position
 
 
 class Model:
     """ Class encapsulating the state of the game world. """
     def __init__(self, initial_map: WorldMap, player: 'src.fighter.Player', mobs: 'List[src.fighter.Mob]'):
-        """ Initializes a model with a given initial map and player's start position. """
+        """ Initializes a model with a given initial map, player and list of current mobs. """
         self.map = initial_map
         self.player = player
         self.mobs = mobs
@@ -28,3 +27,8 @@ class Model:
         self.map = instance.map
         self.player = instance.player
         self.mobs = instance.mobs
+
+    def get_fighter_at(self, pos: Position):
+        for fighter in self.get_fighters():
+            if fighter.position == pos:
+                return fighter

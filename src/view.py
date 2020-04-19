@@ -34,10 +34,15 @@ class View:
         for i in range(model.map.height):
             for j in range(model.map.width):
                 self.console.bg[i, j] = TILE_TO_BG[model.map.tiles[i][j]]
-        player_coords = model.player.position.x, model.player.position.y
         for mob in model.mobs:
-            mob_coords = mob.position.x, mob.position.y
-            self.console.ch[mob_coords] = ORD_SMILEY
-            self.console.fg[mob_coords] = MOB_COLOR
-        self.console.ch[player_coords] = ORD_SMILEY
-        self.console.fg[player_coords] = PLAYER_COLOR
+            self.set_position(mob.position, ch=ORD_SMILEY, fg=MOB_COLOR)
+        self.set_position(model.player.position, ch=ORD_SMILEY, fg=PLAYER_COLOR)
+
+    def set_position(self, pos, ch=None, fg=None, bg=None):
+        pos_pair = pos.x, pos.y
+        if ch is not None:
+            self.console.ch[pos_pair] = ch
+        if fg is not None:
+            self.console.fg[pos_pair] = fg
+        if bg is not None:
+            self.console.bg[pos_pair] = bg
