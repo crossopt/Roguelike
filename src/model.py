@@ -4,7 +4,6 @@ from typing import List
 
 import jsons
 
-# import copy
 import src.fighter
 from src.strategies import FightingStrategy, strategy_deserializer, strategy_serializer
 from src.world_map import WorldMap, Position
@@ -28,9 +27,11 @@ class Model:
         return [self.player] + self.mobs
 
     def get_snapshot(self):
+        """ Returns a string with the serialized current model world state. """
         return jsons.dumps(self, strip_privates=True)
 
     def set_snapshot(self, data):
+        """ Deserializes the model world state from a given string to the current model. """
         instance = jsons.loads(data, Model, strict=True)
         self.map = instance.map
         self.player = instance.player
