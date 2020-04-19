@@ -24,11 +24,28 @@ class AggressiveStrategy(FightingStrategy):
     @staticmethod
     def choose_move(current_model: 'src.model.Model', mob: 'src.fighter.Mob'):
         player = current_model.player
-        dx = -player.position.x + mob.position.x
-        dy = -player.position.y + mob.position.y
-        dx = sign(-dx)
-        dy = sign(-dy)
-        return dx, dy
+
+        dx = [0, 1, 0, -1, 0]
+        dy = [1, 0, -1, 0, 0]
+
+        minimal_distance = abs(mob.position.x - player.position.x) + abs(mob.position.y - player.position.y)
+        target_dir = 4
+
+        for dir in range(4):
+            nx = mob.position.x + dx[dir]
+            ny = mob.position.y + dy[dir]
+
+            if not current_model.map.is_empty(src.world_map.Position(nx, ny)):
+                continue
+            
+            distance = abs(nx - player.position.x) + abs(ny - player.position.y)
+            if distance < minimal_distance:
+                minimal_distance = distance
+                target_dir = dir
+
+
+
+        return dx[target_dir], dy[target_dir]
 
 
 class CowardlyStrategy(FightingStrategy):
@@ -36,11 +53,28 @@ class CowardlyStrategy(FightingStrategy):
     @staticmethod
     def choose_move(current_model: 'src.model.Model', mob: 'src.fighter.Mob'):
         player = current_model.player
-        dx = -player.position.x + mob.position.x
-        dy = -player.position.y + mob.position.y
-        dx = (dx > 0) * 2 - 1
-        dy = (dy > 0) * 2 - 1
-        return dx, dy
+
+        dx = [0, 1, 0, -1, 0]
+        dy = [1, 0, -1, 0, 0]
+
+        maximal_distance = abs(mob.position.x - player.position.x) + abs(mob.position.y - player.position.y)
+        target_dir = 4
+
+        for dir in range(4):
+            nx = mob.position.x + dx[dir]
+            ny = mob.position.y + dy[dir]
+
+            if not current_model.map.is_empty(src.world_map.Position(nx, ny)):
+                continue
+            
+            distance = abs(nx - player.position.x) + abs(ny - player.position.y)
+            if distance > maximal_distance:
+                maximal_distance = distance
+                target_dir = dir
+
+
+
+        return dx[target_dir], dy[target_dir]
 
 
 class PassiveStrategy(FightingStrategy):
