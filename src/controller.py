@@ -73,7 +73,7 @@ class Controller:
                             continue
                         self.dispatch(event.scancode, event.mod, commands)
 
-                while self.model.player.want_to_move():
+                while self.model.player.has_intention():
                     self.tick()
 
     def tick(self):
