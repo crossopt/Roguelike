@@ -43,14 +43,17 @@ class WorldMap:
     """ Class for storing the world map. """
     _DEFAULT_MAP_SIZE = 10
 
-    def __init__(self, height: int = _DEFAULT_MAP_SIZE, width: int = _DEFAULT_MAP_SIZE):
+    def __init__(self, height: int = _DEFAULT_MAP_SIZE, width: int = _DEFAULT_MAP_SIZE,
+                 tiles: 'List[List[MapTile]]' = None):
         """ Generates a default map example. """
         self.height = height
         self.width = width
-        self.tiles = [[MapTile.EMPTY for _ in range(self.width)] for _ in range(self.height)]
+        if tiles is None:
+            tiles = [[MapTile.EMPTY for _ in range(self.width)] for _ in range(self.height)]
+        self.tiles = tiles
 
-    @classmethod
-    def from_tiles(cls, tiles: List[List[MapTile]]):
+    @staticmethod
+    def from_tiles(tiles: List[List[MapTile]]):
         """ Builds a world map from the given tiles. """
         height = len(tiles)
         width = len(tiles[0])
@@ -63,7 +66,8 @@ class WorldMap:
         positions = []
         for i in range(count):
             while True:
-                position = Position(random.randrange(0, self.height), random.randrange(0, self.width))
+                position = Position(random.randrange(0, self.height),
+                                    random.randrange(0, self.width))
                 if self.is_empty(position) and position not in positions:
                     positions.append(position)
                     break

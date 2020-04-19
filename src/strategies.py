@@ -1,6 +1,7 @@
 """ Module containing strategies for various types of mobs. """
 
 import src.model
+import jsons
 
 from abc import abstractmethod
 from random import choice
@@ -25,7 +26,7 @@ def strategy_serializer(obj, **_kwargs):
     return None
 
 
-def strategy_deserializer(obj, **_kwargs):
+def strategy_deserializer(obj, cls: type, **_kwargs):
     if obj['type'] == 'aggressive':
         return AggressiveStrategy()
     if obj['type'] == 'cowardly':

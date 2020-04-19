@@ -1,5 +1,7 @@
 """ Module containing the world logic for the game. """
 
+from typing import List
+
 import jsons
 
 # import copy
@@ -13,9 +15,11 @@ jsons.set_deserializer(strategy_deserializer, FightingStrategy)
 
 class Model:
     """ Class encapsulating the state of the game world. """
-    def __init__(self, initial_map: WorldMap, player: 'src.fighter.Player', mobs: 'List[src.fighter.Mob]'):
+
+    def __init__(self, map: WorldMap = None, player: 'src.fighter.Player' = None,
+                 mobs: 'List[src.fighter.Mob]' = None):
         """ Initializes a model with a given initial map, player and list of current mobs. """
-        self.map = initial_map
+        self.map = map
         self.player = player
         self.mobs = mobs
 
@@ -24,10 +28,10 @@ class Model:
         return [self.player] + self.mobs
 
     def get_snapshot(self):
-        return jsons.dumps(self)
+        return jsons.dumps(self, strip_privates=True)
 
     def set_snapshot(self, data):
-        instance = jsons.load(data, Model)
+        instance = jsons.loads(data, Model, strict=True)
         self.map = instance.map
         self.player = instance.player
         self.mobs = instance.mobs
