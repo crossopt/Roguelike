@@ -3,6 +3,7 @@
 import src.model
 
 from abc import abstractmethod
+from random import choice
 
 
 def sign(x):
@@ -23,58 +24,41 @@ class AggressiveStrategy(FightingStrategy):
     """ An aggressive strategy that always moves towards the player and attacks them. """
     @staticmethod
     def choose_move(current_model: 'src.model.Model', mob: 'src.fighter.Mob'):
-        player = current_model.player
+        player_position = current_model.player.position
+        best_position = mob.position
 
-        dx = [0, 1, 0, -1, 0]
-        dy = [1, 0, -1, 0, 0]
+        for new_position in current_model.map.get_empty_neighbors(mob.position):
+            new_distance = current_model.map.get_distance(new_position, player_position)
+            if new_distance < current_model.map.get_distance(best_position, player_position):
+                best_position = new_position
 
-        minimal_distance = abs(mob.position.x - player.position.x) + abs(mob.position.y - player.position.y)
-        target_dir = 4
-
-        for direction in range(4):
-            nx = mob.position.x + dx[direction]
-            ny = mob.position.y + dy[direction]
-
-            if not current_model.map.is_empty(src.world_map.Position(nx, ny)):
-                continue
-            
-            distance = abs(nx - player.position.x) + abs(ny - player.position.y)
-            if distance < minimal_distance:
-                minimal_distance = distance
-                target_dir = direction
-
-        return dx[target_dir], dy[target_dir]
+        return best_position
 
 
 class CowardlyStrategy(FightingStrategy):
     """ A cowardly strategy that always moves away from the player. """
     @staticmethod
     def choose_move(current_model: 'src.model.Model', mob: 'src.fighter.Mob'):
-        player = current_model.player
+        player_position = current_model.player.position
+        best_position = mob.position
 
-        dx = [0, 1, 0, -1, 0]
-        dy = [1, 0, -1, 0, 0]
+        for new_position in current_model.map.get_empty_neighbors(mob.position):
+            new_distance = current_model.map.get_distance(new_position, player_position)
+            if new_distance > current_model.map.get_distance(best_position, player_position):
+                best_position = new_position
 
-        maximal_distance = abs(mob.position.x - player.position.x) + abs(mob.position.y - player.position.y)
-        target_dir = 4
-
-        for direction in range(4):
-            nx = mob.position.x + dx[direction]
-            ny = mob.position.y + dy[direction]
-
-            if not current_model.map.is_empty(src.world_map.Position(nx, ny)):
-                continue
-            
-            distance = abs(nx - player.position.x) + abs(ny - player.position.y)
-            if distance > maximal_distance:
-                maximal_distance = distance
-                target_dir = direction
-
-        return dx[target_dir], dy[target_dir]
+        return best_position
 
 
 class PassiveStrategy(FightingStrategy):
     """ A passive strategy that does not move. """
     @staticmethod
     def choose_move(current_model: 'src.model.Model', mob: 'src.fighter.Mob'):
-        return 0, 0
+        return mob.position
+
+
+class ConfusedStrategy(FightingStrategy):
+    """ Strategy for a mob that has been confused. """
+    @staticmethod
+    def choose_move(current_model: 'src.model.Model', mob: 'src.fighter.Mob'):
+        return choice(current_model.map.get_empty_neighbors(mob.position))
