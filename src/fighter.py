@@ -2,9 +2,8 @@
 
 from enum import Enum
 
-from src import world_map
-from src.world_map import Position, WorldMap
-
+import src.model
+import src.world_map
 
 class FighterIntention(Enum):
     """ Enum encapsulating the preferred action for a fighter. """
@@ -18,21 +17,36 @@ class FighterIntention(Enum):
 class Fighter:
     """ Class for storing the various in-game fighter characters. """
 
-    def __init__(self, initial_position: Position):
+    def __init__(self, initial_position: 'src.model.Position'):
         """ Initializes a fighter with the given initial position. """
         self.position = initial_position
-        self.intentions = []
+        # self.intentions = []
 
-    def move(self, new_position: Position):
+    def move(self, new_position: 'src.model.Position'):
         """ Changes the fighter's position. """
         self.position = new_position
+
+    # def add_intention(self, new_intention: FighterIntention):
+    #     """ Sets the fighter's move intention to a new one. """
+    #     self.intentions.append(new_intention)
+
+    def choose_move(self, current_model: 'src.model.Model'):
+        """ Selects a move based on the state of the game map. """
+        raise NotImplementedError()
+        
+
+class Player(Fighter):
+
+    def __init__(self, initial_position: 'src.model.Position'):
+        super(Player, self).__init__(initial_position)
+        self.intentions = []
 
     def add_intention(self, new_intention: FighterIntention):
         """ Sets the fighter's move intention to a new one. """
         self.intentions.append(new_intention)
 
-    def choose_move(self, _current_map: WorldMap):
-        """ Selects a move based on the state of the game map. """
+    def choose_move(self, current_model: 'src.model.Model'):
+        world_map = current_model.map
         move = {FighterIntention.STAY: (0, 0),
                 FighterIntention.MOVE_UP: (-1, 0),
                 FighterIntention.MOVE_LEFT: (0, -1),
@@ -47,3 +61,12 @@ class Fighter:
         dx, dy = move[intention]
         chosen_position = world_map.Position(self.position.x + dx, self.position.y + dy)
         return chosen_position
+
+class Mob(Fighter):
+
+    def __init__(self, initial_position: 'src.model.Position', fightingStrategy):
+        super(Mob, self).__init__(initial_position)
+        self.fightingStrategy = fightingStrategy
+
+    def choose_move(self, current_model: 'src.model.Model'):
+        return world_map.Position(self.position.x + 0, self.position.y + 0)
