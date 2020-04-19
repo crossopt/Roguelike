@@ -44,7 +44,6 @@ class Fighter(ABC):
     @abstractmethod
     def get_attack(self) -> int:
         """ Returns the strength of the fighter's attack. """
-        pass
 
     @abstractmethod
     def choose_move(self, current_model: 'src.model.Model'):
