@@ -59,14 +59,14 @@ class Player(Fighter):
             intention = self.intentions[0]
             self.intentions = self.intentions[1:]
         dx, dy = move[intention]
-        chosen_position = world_map.Position(self.position.x + dx, self.position.y + dy)
+        chosen_position = src.world_map.Position(self.position.x + dx, self.position.y + dy)
         return chosen_position
 
 class Mob(Fighter):
 
-    def __init__(self, initial_position: 'src.model.Position', fightingStrategy):
+    def __init__(self, initial_position: 'src.model.Position', fighting_strategy):
         super(Mob, self).__init__(initial_position)
-        self.fightingStrategy = fightingStrategy
+        self.fighting_strategy = fighting_strategy
 
     def choose_move(self, current_model: 'src.model.Model'):
-        return world_map.Position(self.position.x + 0, self.position.y + 0)
+        return src.world_map.Position(self.position.x + 0, self.position.y + 0)
