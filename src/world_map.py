@@ -73,6 +73,20 @@ class WorldMap:
         """ Checks whether a tile on the map is empty. """
         return self.is_on_map(position) and self.tiles[position.x][position.y] == MapTile.EMPTY
 
+    @staticmethod
+    def get_distance(first_position: Position, second_position: Position):
+        """ Returns the distance in map metrics between two positions on the map. """
+        return abs(first_position.x - second_position.x) + abs(first_position.y - second_position.y)
+
+    def get_empty_neighbors(self, position: Position):
+        """ Returns list of positions of empty tiles at manhattan distance 1. """
+        empty_neighbors = []
+        for dx, dy in {(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)}:
+            neighbor = Position(position.x + dx, position.y + dy)
+            if self.is_empty(neighbor):
+                empty_neighbors.append(neighbor)
+        return empty_neighbors
+
     def is_on_map(self, position: Position):
         """ Returns True if the given position exists on the map, False otherwise. """
         return 0 <= position.x < self.height and 0 <= position.y < self.width
