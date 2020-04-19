@@ -1,6 +1,7 @@
 """ Module containing strategies for various types of mobs. """
 
 import src.model
+import jsons
 
 from abc import abstractmethod
 
@@ -10,7 +11,7 @@ def sign(x):
     return x and (1, -1)[x < 0]
 
 
-class FightingStrategy:
+class FightingStrategy(jsons.JsonSerializable):
     """ The base class for all fighting strategies for mobs. """
     @staticmethod
     @abstractmethod
