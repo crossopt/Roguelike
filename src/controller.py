@@ -1,28 +1,32 @@
 """ Module containing the main controller logic for the game. """
 
+import random
 from argparse import ArgumentParser
 from typing import List
 
 import tcod
 import tcod.event
 
+<<<<<<< HEAD
 import os
 
 import random
 
+=======
+>>>>>>> 60f73703a3c3c4157875d2b663973f1175e256ee
 import src.fighter
 import src.strategies
-from src.fighting_system import CoolFightingSystem
 from src import model
 from src import view
-from src import world_map
+from src.fighting_system import CoolFightingSystem
+from src.view import TOTAL_WIDTH, TOTAL_HEIGHT
 from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
 
 
 class Controller:
     """ The class responsible for controlling the main game flow. """
-    _DEFAULT_MAP_WIDTH = 10
-    _DEFAULT_MAP_HEIGHT = 10
+    _DEFAULT_MAP_WIDTH = 30
+    _DEFAULT_MAP_HEIGHT = 30
 
     _TILESET_PATH = 'fonts/medium_font.png'
     _TILESET_OPTIONS = tcod.FONT_LAYOUT_ASCII_INROW | tcod.FONT_TYPE_GREYSCALE
@@ -51,9 +55,19 @@ class Controller:
 
             self.model = model.Model(game_map, player, mobs)
         else:
+<<<<<<< HEAD
             with open('save.save', 'rb') as file:
                 self.model = model.Model(None, None, None)
                 self.model.set_snapshot(file)
+=======
+            game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
+                                              Controller._DEFAULT_MAP_WIDTH).get()
+
+        mobs_count = 5
+        positions = game_map.get_random_empty_positions(mobs_count + 1)
+        player = src.fighter.Player(positions[0])
+        mobs = [src.fighter.Mob(positions[i], src.strategies.AggressiveStrategy()) for i in range(1, mobs_count + 1)]
+>>>>>>> 60f73703a3c3c4157875d2b663973f1175e256ee
 
         self.program_is_running = True
         self.view = None
@@ -68,8 +82,8 @@ class Controller:
             Controller._TILESET_VERTICAL,
         )
 
-        with tcod.console_init_root(self.model.map.width,
-                                    self.model.map.height,
+        with tcod.console_init_root(TOTAL_WIDTH,
+                                    TOTAL_HEIGHT,
                                     vsync=True, order='C') as root_console:
             self.view = view.View(root_console)
 

@@ -30,6 +30,7 @@ class Model:
         self.mobs = instance.mobs
 
     def get_fighter_at(self, pos: Position):
+        """ Returns the fighter in a given position if it exists, None otherwise. """
         for fighter in self.get_fighters():
             if fighter.position == pos:
                 return fighter

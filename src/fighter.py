@@ -32,12 +32,14 @@ class Fighter(ABC):
         """ Changes the fighter's position. """
         self.position = new_position
 
-    def deal_damage(self, damage: int) -> None:
+    def take_damage(self, damage: int) -> None:
+        """ Deals the given amount of damage to the fighter. """
         damage = min(damage, self.hp)
         self.hp -= damage
 
     @abstractmethod
     def get_attack(self) -> int:
+        """ Returns the strength of the fighter's attack. """
         pass
 
     @abstractmethod
@@ -48,7 +50,6 @@ class Fighter(ABC):
 
 class Player(Fighter):
     """ Class for storing the player-controlled fighter character. """
-
     def get_attack(self) -> int:
         return PLAYER_BASE_ATTACK + self.get_additional_attack()
 

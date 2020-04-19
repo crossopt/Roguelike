@@ -32,9 +32,9 @@ class AggressiveStrategy(FightingStrategy):
         minimal_distance = abs(mob.position.x - player.position.x) + abs(mob.position.y - player.position.y)
         target_dir = 4
 
-        for dir in range(4):
-            nx = mob.position.x + dx[dir]
-            ny = mob.position.y + dy[dir]
+        for direction in range(4):
+            nx = mob.position.x + dx[direction]
+            ny = mob.position.y + dy[direction]
 
             if not current_model.map.is_empty(src.world_map.Position(nx, ny)):
                 continue
@@ -42,9 +42,7 @@ class AggressiveStrategy(FightingStrategy):
             distance = abs(nx - player.position.x) + abs(ny - player.position.y)
             if distance < minimal_distance:
                 minimal_distance = distance
-                target_dir = dir
-
-
+                target_dir = direction
 
         return dx[target_dir], dy[target_dir]
 
@@ -61,9 +59,9 @@ class CowardlyStrategy(FightingStrategy):
         maximal_distance = abs(mob.position.x - player.position.x) + abs(mob.position.y - player.position.y)
         target_dir = 4
 
-        for dir in range(4):
-            nx = mob.position.x + dx[dir]
-            ny = mob.position.y + dy[dir]
+        for direction in range(4):
+            nx = mob.position.x + dx[direction]
+            ny = mob.position.y + dy[direction]
 
             if not current_model.map.is_empty(src.world_map.Position(nx, ny)):
                 continue
@@ -71,9 +69,7 @@ class CowardlyStrategy(FightingStrategy):
             distance = abs(nx - player.position.x) + abs(ny - player.position.y)
             if distance > maximal_distance:
                 maximal_distance = distance
-                target_dir = dir
-
-
+                target_dir = direction
 
         return dx[target_dir], dy[target_dir]
 
