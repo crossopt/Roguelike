@@ -6,6 +6,7 @@ from abc import abstractmethod
 
 
 def sign(x):
+    """ Returns the sign of an integer: 0 for 0, -1 for negative integers and 1 for positive ones.  """
     return x and (1, -1)[x < 0]
 
 
