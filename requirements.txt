@@ -2,5 +2,4 @@ cffi==1.14.0
 jsons==1.1.2
 numpy==1.18.2
 pycparser==2.20
-tcod==11.11.0
 typish==1.6.0
