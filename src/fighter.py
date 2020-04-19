@@ -5,6 +5,7 @@ from enum import Enum
 import src.model
 import src.world_map
 
+
 class PlayerIntention(Enum):
     """ Enum encapsulating the preferred action for a fighter. """
     STAY = 0
@@ -16,7 +17,6 @@ class PlayerIntention(Enum):
 
 class Fighter:
     """ Class for storing the various in-game fighter characters. """
-
     def __init__(self, initial_position: 'src.model.Position'):
         """ Initializes a fighter with the given initial position. """
         self.position = initial_position
@@ -27,13 +27,14 @@ class Fighter:
 
     @abstractmethod
     def choose_move(self, current_model: 'src.model.Model'):
-        """ Selects a move based on the state of the game map. """
+        """ Selects a move based on the state of the model world. """
         raise NotImplementedError()
         
 
 class Player(Fighter):
     """ Class for storing the player-controlled fighter character. """
     def __init__(self, initial_position: 'src.model.Position'):
+        """ Initializes a player character with the given initial position. """
         super(Player, self).__init__(initial_position)
         self.intentions = []
 
@@ -78,9 +79,11 @@ class Player(Fighter):
 class Mob(Fighter):
     """ Class for storing NPC mobs. """
     def __init__(self, initial_position: 'src.model.Position', fighting_strategy):
+        """ Initializes a mob with the given initial position and fighting strategy. """
         super(Mob, self).__init__(initial_position)
         self.fighting_strategy = fighting_strategy
 
     def choose_move(self, current_model: 'src.model.Model'):
+        """ Chooses a move for the mob based on its strategy. """
         (dx, dy) = self.fighting_strategy.choose_move(current_model, self)
         return src.world_map.Position(self.position.x + dx, self.position.y + dy)
