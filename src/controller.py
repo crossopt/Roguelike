@@ -57,6 +57,8 @@ class Controller:
                 self.view.draw(self.model)
                 tcod.console_flush()
 
+                commands = self.model.player.get_commands()
+
                 for event in tcod.event.wait():
                     if event.type == 'QUIT':
                         self.program_is_running = False
@@ -65,27 +67,32 @@ class Controller:
                     if event.type == 'KEYDOWN':
                         if event.repeat:
                             continue
-                        self.dispatch(event.scancode, event.mod)
+                        self.dispatch(event.scancode, event.mod, commands)
 
-                game_map = self.model.map
-                tiles = game_map.tiles
-                fighters = self.model.get_fighters()
+                while self.model.player.want_to_move():
+                    self.tick()
 
-                for fighter in fighters:
-                    intended_position = fighter.choose_move(self.model)
-                    if game_map.is_on_map(intended_position) and \
-                       tiles[intended_position.x][intended_position.y] == world_map.MapTile.EMPTY:
-                        fighter.move(intended_position)
+    def tick(self):
+        game_map = self.model.map
+        tiles = game_map.tiles
+        fighters = self.model.get_fighters()
 
-    def dispatch(self, code, _mod):
+        for fighter in fighters:
+            intended_position = fighter.choose_move(self.model)
+            if game_map.is_on_map(intended_position) and \
+                tiles[intended_position.x][intended_position.y] == world_map.MapTile.EMPTY:
+                fighter.move(intended_position)
+
+
+    def dispatch(self, code, _mod, commands):
         """ Handles the user's key down presses and sets the relevant intentions for a player.
 
         :param code: a scancode of the main key pressed.
         :param _mod: a modifier, a mask of the functional keys pressed with the main one.
         """
-        code_to_intention = {tcod.event.SCANCODE_W: src.fighter.FighterIntention.MOVE_UP,
-                             tcod.event.SCANCODE_A: src.fighter.FighterIntention.MOVE_LEFT,
-                             tcod.event.SCANCODE_S: src.fighter.FighterIntention.MOVE_DOWN,
-                             tcod.event.SCANCODE_D: src.fighter.FighterIntention.MOVE_RIGHT}
-        if code in code_to_intention:
-            self.model.add_player_intention(code_to_intention[code])
+        code_to_cmd = {tcod.event.SCANCODE_W: commands['go_up'],
+                       tcod.event.SCANCODE_A: commands['go_left'],
+                       tcod.event.SCANCODE_S: commands['go_down'],
+                       tcod.event.SCANCODE_D: commands['go_right']}
+        if code in code_to_cmd:
+            code_to_cmd[code]()

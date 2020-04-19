@@ -5,7 +5,7 @@ from enum import Enum
 import src.model
 import src.world_map
 
-class FighterIntention(Enum):
+class PlayerIntention(Enum):
     """ Enum encapsulating the preferred action for a fighter. """
     STAY = 0
     MOVE_UP = 1
@@ -26,7 +26,7 @@ class Fighter:
         """ Changes the fighter's position. """
         self.position = new_position
 
-    # def add_intention(self, new_intention: FighterIntention):
+    # def add_intention(self, new_intention: PlayerIntention):
     #     """ Sets the fighter's move intention to a new one. """
     #     self.intentions.append(new_intention)
 
@@ -36,25 +36,41 @@ class Fighter:
         
 
 class Player(Fighter):
-
     def __init__(self, initial_position: 'src.model.Position'):
         super(Player, self).__init__(initial_position)
         self.intentions = []
 
-    def add_intention(self, new_intention: FighterIntention):
+    def _add_intention(self, new_intention: PlayerIntention):
         """ Sets the fighter's move intention to a new one. """
         self.intentions.append(new_intention)
 
+    def want_to_move(self):
+        return len(self.intentions) > 0
+
+    def get_commands(self):
+        cmd_name_to_intention = {'stay': PlayerIntention.STAY,
+                'go_up': PlayerIntention.MOVE_UP,
+                'go_left': PlayerIntention.MOVE_LEFT,
+                'go_down': PlayerIntention.MOVE_DOWN,
+                'go_right': PlayerIntention.MOVE_RIGHT}
+
+        commands = dict()
+
+        for cmd_name, intention in cmd_name_to_intention.items():
+            commands[cmd_name] = lambda intention=intention: self._add_intention(intention)
+
+        return commands
+
     def choose_move(self, current_model: 'src.model.Model'):
         world_map = current_model.map
-        move = {FighterIntention.STAY: (0, 0),
-                FighterIntention.MOVE_UP: (-1, 0),
-                FighterIntention.MOVE_LEFT: (0, -1),
-                FighterIntention.MOVE_DOWN: (1, 0),
-                FighterIntention.MOVE_RIGHT: (0, 1)}
+        move = {PlayerIntention.STAY: (0, 0),
+                PlayerIntention.MOVE_UP: (-1, 0),
+                PlayerIntention.MOVE_LEFT: (0, -1),
+                PlayerIntention.MOVE_DOWN: (1, 0),
+                PlayerIntention.MOVE_RIGHT: (0, 1)}
 
         if len(self.intentions) == 0:
-            intention = FighterIntention.STAY
+            intention = PlayerIntention.STAY
         else:
             intention = self.intentions[0]
             self.intentions = self.intentions[1:]
