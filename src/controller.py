@@ -37,7 +37,7 @@ class Controller:
                                               Controller._DEFAULT_MAP_WIDTH).get()
             
         player = src.fighter.Player(game_map.get_random_empty_position())
-        mobs = [src.fighter.Mob(game_map.get_random_empty_position(), src.strategies.CowardlyStrategy())]
+        mobs = [src.fighter.Mob(game_map.get_random_empty_position(), src.strategies.AggressiveStrategy())]
 
         self.model = model.Model(game_map, player, mobs)
         self.program_is_running = True
