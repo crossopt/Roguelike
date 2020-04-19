@@ -6,6 +6,7 @@ import tcod
 import tcod.event
 
 import src.fighter
+import src.strategies
 from src import model
 from src import view
 from src import world_map
@@ -34,8 +35,11 @@ class Controller:
         else:
             game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
                                               Controller._DEFAULT_MAP_WIDTH).get()
+            
+        player = src.fighter.Player(game_map.get_random_empty())
+        mobs = [src.fighter.Mob(game_map.get_random_empty(), src.strategies.CowardlyStrategy())]
 
-        self.model = model.Model(game_map, game_map.get_player_start())
+        self.model = model.Model(game_map, player, mobs)
         self.program_is_running = True
         self.view = None
 

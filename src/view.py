@@ -9,6 +9,7 @@ from src.world_map import MapTile
 WALL_COLOR = tcod.white
 PATH_COLOR = tcod.black
 PLAYER_COLOR = tcod.yellow
+MOB_COLOR = tcod.red
 TEXT_COLOR = tcod.grey
 
 ORD_SMILEY = 1
@@ -34,5 +35,9 @@ class View:
             for j in range(model.map.width):
                 self.console.bg[i, j] = TILE_TO_BG[model.map.tiles[i][j]]
         player_coords = model.player.position.x, model.player.position.y
+        for mob in model.mobs:
+            mob_coords = mob.position.x, mob.position.y
+            self.console.ch[mob_coords] = ORD_SMILEY
+            self.console.fg[mob_coords] = MOB_COLOR
         self.console.ch[player_coords] = ORD_SMILEY
         self.console.fg[player_coords] = PLAYER_COLOR

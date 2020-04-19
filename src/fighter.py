@@ -85,5 +85,5 @@ class Mob(Fighter):
         self.fighting_strategy = fighting_strategy
 
     def choose_move(self, current_model: 'src.model.Model'):
-        (dx, dy) = fighting_strategy.choose_move(current_model, self)
+        (dx, dy) = self.fighting_strategy.choose_move(current_model, self)
         return src.world_map.Position(self.position.x + dx, self.position.y + dy)

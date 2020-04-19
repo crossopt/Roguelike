@@ -6,6 +6,8 @@ from itertools import product
 from dataclasses import dataclass
 from typing import List, Iterable
 
+import random
+
 
 @dataclass
 class Position:
@@ -56,15 +58,12 @@ class WorldMap:
         game_map.tiles = tiles
         return game_map
 
-    def get_player_start(self):
-        """
-        Returns a starting position for the player: the first free tile,
-        or None if no free tile was found.
-        """
-        for x, y in product(range(self.height), range(self.width)):
+    def get_random_empty(self):
+        while True:
+            x = random.randint(0, self.height-1)
+            y = random.randint(0, self.width-1)
             if self.tiles[x][y] == MapTile.EMPTY:
                 return Position(x, y)
-        return None
 
     def is_on_map(self, position: Position):
         """ Returns True if the given position exists on the map, False otherwise. """
