@@ -41,7 +41,7 @@ class View:
             for j in range(VIEW_WIDTH):
                 self.console.bg[i, j] = PATH_COLOR if model.get_map().is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
         for fighter in model.get_drawable_fighters():
-            self._draw_character(fighter.position, offset, ch=ORD_SMILEY, fg=self._style_to_color(fighter.get_style(), fighter.get_intensity()))
+            self._draw_character(fighter.get_position(), offset, ch=ORD_SMILEY, fg=self._style_to_color(fighter.get_style(), fighter.get_intensity()))
 
         # draw HUD
 

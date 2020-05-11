@@ -14,15 +14,15 @@ jsons.set_deserializer(strategy_deserializer, FightingStrategy)
 
 class DrawableModel(ABC):
     @abstractmethod
-    def get_drawable_fighters(self):
+    def get_drawable_fighters(self) -> 'List[src.fighter.DrawableFighter]':
         pass
 
     @abstractmethod
-    def get_player(self):
+    def get_player(self) -> 'src.fighter.Player':
         pass
 
     @abstractmethod
-    def get_map(self):
+    def get_map(self) -> 'src.world_map.WorldMap':
         pass
 
 
