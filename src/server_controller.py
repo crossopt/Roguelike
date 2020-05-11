@@ -184,9 +184,9 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         player = subscriber.player
         moves = {
             0: "stay",
-            1: "go_left",
+            1: "go_right",
             2: "go_down",
-            3: "go_right",
+            3: "go_left",
             4: "go_up",
         }
         player.get_commands()[moves[request.moveId]]()
