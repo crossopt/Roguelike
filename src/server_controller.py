@@ -1,4 +1,4 @@
-""" Module containing the main controller logic for the game. """
+""" Module containing the main controller logic for the server-based version of the game. """
 
 import queue
 import random
@@ -14,8 +14,10 @@ from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
 SAVE_FILE_NAME = 'save'
 
 
-class Subscriber():
+class Subscriber:
+    """ Class that stores players that have subscribed to the current game. """
     def __init__(self, id, room, player):
+        """ Creates a new subscriber from the given player in the given room. """
         self.id = id
         self.room = room
         self.player = player
@@ -23,13 +25,16 @@ class Subscriber():
         self.queue = queue.Queue()
 
 
-class RoomManager():
+class RoomManager:
+    """ Class responsible for managing various rooms containing the players. """
     def __init__(self):
+        """ Creates an RoomManager without any rooms. """
         self.subscribers = {}
         self.rooms = {}
         self.subscribed = 0
 
-    def create_new_room(self, room):
+    def create_new_room(self, room_name):
+        """ Creates a new room with the given name to manage. """
         _DEFAULT_MAP_WIDTH = 30
         _DEFAULT_MAP_HEIGHT = 30
         _MOB_COUNT = 8
@@ -41,43 +46,50 @@ class RoomManager():
                             src.strategies.AggressiveStrategy(),
                             src.strategies.PassiveStrategy(),
                             src.strategies.CowardlyStrategy()])) for i in range(0, _MOB_COUNT)]
-        self.rooms[room] = model.FullModel(game_map, [], mobs)
+        self.rooms[room_name] = model.FullModel(game_map, [], mobs)
 
-    def spawn_player(self, model):
-        position = model.map.get_random_empty_positions(1)[0]
+    def spawn_player(self, destination_model):
+        """ Creates a new player in a random position in the given model. """
+        position = destination_model.map.get_random_empty_positions(1)[0]
         player = src.fighter.Player(position)
-        model.players.append(player)
+        destination_model.players.append(player)
         return player
 
-    def subscribe(self, room):
-        if room not in self.rooms:
-            self.create_new_room(room)
+    def subscribe(self, room_name):
+        """ Creates a player in the given room, subscribes them to the game, returns an unique player id. """
+        if room_name not in self.rooms:
+            self.create_new_room(room_name)
 
-        player = self.spawn_player(self.rooms[room])
+        player = self.spawn_player(self.rooms[room_name])
 
         id = str(len(self.subscribers))
-        self.subscribers[id] = Subscriber(id, room, player)
+        self.subscribers[id] = Subscriber(id, room_name, player)
         self.subscribed += 1
         return id
 
     def get_subscriber(self, id):
+        """ Returns the subscriber with the given id or None if none exists. """
         return self.subscribers.get(id, None)
 
-    def get_room(self, room):
-        return self.rooms.get(room, None)
+    def get_room(self, room_name):
+        """ Returns the room with the given name or None if none exists. """
+        return self.rooms.get(room_name, None)
 
     def get_queue(self, id):
+        """ Returns the queue for the subscriber with the given id or None if the subscriber does not exist. """
         if id in self.subscribers:
             return self.subscribers[id].queue
         return None
 
 
 class Servicer(src.roguelike_pb2_grpc.GameServicer):
+    """ Class that implements the interface of the Game service. """
     def __init__(self):
+        """ Creates a Servicer with an empty RoomManager. """
         self.room_manager = RoomManager()
         self.fighting_system = CoolFightingSystem()
 
-    def tick(self, model):
+    def _tick(self, model):
         self.intentions_got = 0
 
         game_map = model.map
@@ -108,6 +120,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         model.mobs = mobs
 
     def Join(self, request, context):
+        """ Processes the joining of a player to the game. """
         id = self.room_manager.subscribe(request.room)
         yield src.roguelike_pb2.Id(id=id)
 
@@ -118,6 +131,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
             yield src.roguelike_pb2.Id(id=id)
 
     def GetMap(self, request, context):
+        """ Returns the game map for the game of the subscriber issuing the request. """
         id = request.id
         subscriber = self.room_manager.get_subscriber(id)
         game_map = self.room_manager.get_room(subscriber.room).map
@@ -129,6 +143,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
                 height=game_map.height, width=game_map.width)
 
     def GetPlayer(self, request, context):
+        """ Returns the player character for the game of the subscriber issuing the request. """
         id = request.id
         subscriber = self.room_manager.get_subscriber(id)
         player = src.roguelike_pb2.Player(
@@ -137,6 +152,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         return player
 
     def GetMobs(self, request, context):
+        """ Returns the mob list for the game of the subscriber issuing the request. """
         id = request.id
         subscriber = self.room_manager.get_subscriber(id)
         model = self.room_manager.get_room(subscriber.room)
@@ -151,6 +167,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         return result 
 
     def SendIntention(self, request, context):
+        """ Sends a move that the subscriber issuing the request wants his player to do. """
         id = request.id.id
         subscriber = self.room_manager.get_subscriber(id)
         player = subscriber.player
@@ -165,8 +182,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         self.intentions_got += 1
 
         if self.intentions_got == self.room_manager.subscribed:
-            print("here")
-            self.tick(self.room_manager.get_room(subscriber.room))
+            self._tick(self.room_manager.get_room(subscriber.room))
             for subscriber in self.room_manager.subscribers.values():
                 subscriber.queue.put('Ping')
 
