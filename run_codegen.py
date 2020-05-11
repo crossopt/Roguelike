@@ -17,7 +17,7 @@ from grpc_tools import protoc
 
 protoc.main((
     '-Isrc',
-    '--python_out=src',
-    '--grpc_python_out=src',
-    'roguelike.proto',
+    '--python_out=.',
+    '--grpc_python_out=.',
+    'src/roguelike.proto',
 ))
