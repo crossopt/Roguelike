@@ -55,10 +55,10 @@ class RoomManager():
 
         player = self.spawn_player(self.rooms[room])
 
-        id = len(self.subscribers)
+        id = str(len(self.subscribers))
         self.subscribers[id] = Subscriber(id, room, player)
         self.subscribed += 1
-        return str(id)
+        return id
 
     def get_subscriber(self, id):
         return self.subscribers.get(id, None)
@@ -123,7 +123,9 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         game_map = self.room_manager.get_room(subscriber.room).map
 
         return src.roguelike_pb2.Map(
-                data=[src.roguelike_pb2.Cell(isEmpty=game_map.is_empty(src.world_map.Position(i, j))) for j in game_map.width for i in game_map.height],
+                data=[src.roguelike_pb2.Cell(isEmpty=game_map.is_empty(src.world_map.Position(i, j)))
+                for j in range(game_map.width)
+                for i in range(game_map.height)],
                 height=game_map.height, width=game_map.width)
 
     def GetPlayer(self, request, context):
