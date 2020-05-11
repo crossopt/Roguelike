@@ -46,7 +46,7 @@ class RoomManager():
     def spawn_player(self, model):
         position = model.map.get_random_empty_positions(1)[0]
         player = src.fighter.Player(position)
-        model.players.add(position)
+        model.players.append(player)
         return player
 
     def subscribe(self, room):
@@ -60,8 +60,8 @@ class RoomManager():
         self.subscribed += 1
         return str(id)
 
-    def get_subscriber(self, subscriber):
-        return self.subscribers.get(subscriber, None)
+    def get_subscriber(self, id):
+        return self.subscribers.get(id, None)
 
     def get_room(self, room):
         return self.rooms.get(room, None)
