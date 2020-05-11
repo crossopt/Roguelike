@@ -140,7 +140,7 @@ class ClientController:
                     self._wait_for_any_key()
                     self.program_is_running = False
 
-        self.stub.Disconnect(id)
+        self.stub.Disconnect(self.id)
 
     @staticmethod
     def _wait_for_any_key():
