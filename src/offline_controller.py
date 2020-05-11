@@ -1,4 +1,4 @@
-""" Module containing the main controller logic for the game. """
+""" Module containing the main controller logic for the offline version of the game. """
 
 import os
 import random
@@ -20,7 +20,7 @@ SAVE_FILE_NAME = 'save'
 
 
 class Controller:
-    """ The class responsible for controlling the main game flow. """
+    """ The class responsible for controlling the main game flow for an offline game. """
     _DEFAULT_MAP_WIDTH = 30
     _DEFAULT_MAP_HEIGHT = 30
     _MOB_COUNT = 8
