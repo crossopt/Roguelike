@@ -41,13 +41,13 @@ class ClientController:
 
         channel = grpc.insecure_channel('localhost:50051')
         self.stub = src.roguelike_pb2_grpc.GameStub(channel)
-        self.pings = self.stub.Join("test")
+        self.pings = self.stub.Join(src.roguelike_pb2.Room(room='test'))
         self.id = self.pings.__next__()
         mapm = self.stub.GetMap(self.id)
-        tiles = [[MapTile.EMPTY if mapm[i * mapm.width + j].isEmpty else MapTile.BLOCKED for j in range(mapm.width)] for i in range(mapm.height)]
+        tiles = [[MapTile.EMPTY if mapm[i * mapm.width + j].isEmpty else MapTile.BLOCKED for j in
+                  range(mapm.width)] for i in range(mapm.height)]
         self.model = ClientModel(WorldMap.from_tiles(tiles), None, None)
         self.run_loop()
-
 
     def run_loop(self):
         """ Starts a new game and runs it until the user quits the game. """
@@ -70,21 +70,23 @@ class ClientController:
                 self.model.player.position = Position(playerm.position.x, playerm.position.y)
                 self.model.player.hp = playerm.hp
 
-                self.model.other_fighters = [RemoteFighter(mob.intensity, mob.style, Position(mob.position.x, mob.position.y)) for mob in mobsm]
+                self.model.other_fighters = [RemoteFighter(mob.intensity, mob.style,
+                                                           Position(mob.position.x, mob.position.y))
+                                             for mob in mobsm]
 
                 self.move_done = False
 
                 commands = self.model.player.get_commands()
 
                 def move(dir: int):
-                    self.stub.SendIntention(Intention(dir, self.model.player.used_weapon, self.id))
+                    self.stub.SendIntention(Intention(command=dir, weaponId=self.model.player.used_weapon, id=self.id))
                     self.move_done = True
 
-                commands['stay']     = lambda: move(0)
-                commands['go_right'] = lambda: move(1)
-                commands['go_up']    = lambda: move(2)
-                commands['go_left']  = lambda: move(3)
-                commands['go_down']  = lambda: move(4)
+                commands['stay'] = lambda: move(0)
+                commands['go_up'] = lambda: move(1)
+                commands['go_left'] = lambda: move(2)
+                commands['go_down'] = lambda: move(3)
+                commands['go_right'] = lambda: move(4)
 
                 while self.program_is_running and not self.move_done:
                     self.view.draw(self.model)

@@ -1,33 +1,24 @@
 """ Module containing the main controller logic for the game. """
 
-import os
+import queue
 import random
-from argparse import ArgumentParser
-
-import tcod
-import tcod.event
-
 import time
-import threading, queue
+from concurrent import futures
+
+import grpc
 
 import src.fighter
-import src.strategies
-from src import model
-from src import view
-from src.fighting_system import CoolFightingSystem
-from src.view import TOTAL_WIDTH, TOTAL_HEIGHT
-from src.weapon import WeaponBuilder
-from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
-
-from concurrent import futures
-import grpc
 import src.roguelike_pb2
 import src.roguelike_pb2_grpc
+import src.strategies
+from src import model
+from src.fighting_system import CoolFightingSystem
+from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
 
 SAVE_FILE_NAME = 'save'
 
-class Subscriber():
 
+class Subscriber():
     def __init__(self, id, room, player):
         self.id = id
         self.room = room
@@ -35,8 +26,8 @@ class Subscriber():
         self.subscribed = True
         self.queue = queue.Queue()
 
-class RoomManager():
 
+class RoomManager():
     def __init__(self):
         self.subscribers = {}
         self.rooms = {}
@@ -54,7 +45,7 @@ class RoomManager():
                             src.strategies.AggressiveStrategy(),
                             src.strategies.PassiveStrategy(),
                             src.strategies.CowardlyStrategy()])) for i in range(0, _MOB_COUNT)]
-        self.rooms[room] = model.Model(game_map, [], mobs)
+        self.rooms[room] = model.FullModel(game_map, [], mobs)
 
     def spawn_player(self, model):
         position = model.map.get_random_empty_positions(1)[0]
@@ -68,8 +59,8 @@ class RoomManager():
 
         player = self.spawn_player(self.rooms[room])
 
-        id = len(subscribers)
-        self.subcribers[id] = Subscriber(id, room, player)
+        id = len(self.subscribers)
+        self.subscribers[id] = Subscriber(id, room, player)
         self.subscribed += 1
         return str(id)
 
@@ -84,8 +75,8 @@ class RoomManager():
             return self.subscribers[id].queue
         return None
 
-class Servicer(src.roguelike_pb2_grpc.GameServicer):
 
+class Servicer(src.roguelike_pb2_grpc.GameServicer):
     def __init__(self):
         self.room_manager = RoomManager()
         self.fighting_system = CoolFightingSystem()
@@ -93,9 +84,6 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         src.roguelike_pb2_grpc.add_GameServicer_to_server(
             src.roguelike_pb2_grpc.GameServicer(), self.server)
         self.server.add_insecure_port('[::]:50051')
-
-
-        
 
     def start(self):
         self.server.start()
@@ -120,22 +108,18 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
             if target is None:
                 fighter.position = intended_position
 
-
-
         players = []
-        for player in self.model.mobs:
+        for player in model.mobs:
             if player.hp > 0:
                 players.append(player)
-        self.model.players = players
+        model.players = players
 
 
         mobs = []
-        for mob in self.model.mobs:
+        for mob in model.mobs:
             if mob.hp > 0:
                 mobs.append(mob)
-        self.model.mobs = mobs
-
-        pass
+        model.mobs = mobs
 
     def Join(self, request, context):
         id = self.room_manager.subscribe(request.room)
@@ -153,7 +137,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         game_map = self.room_manager.get_room(subscriber.room).map
 
         return src.roguelike_pb2.Map(
-                [src.roguelike_pb2.Cell(game_map.is_empty(world_map.Position(i, j))) for j in game_map.width for i in game_map.height],
+                [src.roguelike_pb2.Cell(game_map.is_empty(src.world_map.Position(i, j))) for j in game_map.width for i in game_map.height],
                 game_map.height, game_map.width)
 
     def GetPlayer(self, request, context):
@@ -174,7 +158,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
                      src.roguelike_pb2.Position(mob.position.x, mob.position.y),
                      mob.get_style(),
                      mob.get_intensity()
-                 )]
+                 ) for mob in mobs]
         )
         return result 
 
@@ -183,18 +167,18 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         subscriber = self.room_manager.get_subscriber(id)
         player = subscriber.player
         moves = {
-            0: "stay",
-            1: "go_right",
-            2: "go_down",
-            3: "go_left",
-            4: "go_up",
+            0: 'stay',
+            1: 'go_up',
+            2: 'go_left',
+            3: 'go_down',
+            4: 'go_right',
         }
         player.get_commands()[moves[request.moveId]]()
         self.intentions_got += 1
 
-        if self.intentions_got == self.subscribed:
+        if self.intentions_got == self.room_manager.subscribed:
             self.tick(self.room_manager.get_room(subscriber.room))
-            for subscriber in self.subscribers.values():
+            for subscriber in self.room_manager.subscribers.values():
                 subscriber.queue.put('Ping')
 
         return src.roguelike_pb2.Empty()
