@@ -143,7 +143,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         mobs = model.mobs + [player for player in model.players if player != subscriber.player]
         result = src.roguelike_pb2.Mobs(
                  data=[src.roguelike_pb2.Mob(
-                     position=src.roguelike_pb2.Position(mob.position.x, mob.position.y),
+                     position=src.roguelike_pb2.Position(x=mob.position.x, y=mob.position.y),
                      style=mob.get_style(),
                      intensity=mob.get_intensity()
                  ) for mob in mobs]
