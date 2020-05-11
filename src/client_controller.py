@@ -81,6 +81,8 @@ class ClientController:
                 commands = self.model.player.get_commands()
 
                 def move(dir: int):
+                    if self.move_done:
+                        return
                     self.stub.SendIntention(Intention(moveId=dir, weaponId=self.model.player.used_weapon, id=self.id))
                     self.move_done = True
 
@@ -90,11 +92,19 @@ class ClientController:
                 commands['go_down'] = lambda: move(3)
                 commands['go_right'] = lambda: move(4)
 
+                for _ in tcod.event.wait():
+                    if event.type == 'QUIT':
+                        self.program_is_running = False
+                        break
+
                 while self.program_is_running and not self.move_done:
                     self.view.draw(self.model)
                     tcod.console_flush()
 
                     for event in tcod.event.wait():
+                        if self.move_done:
+                            break
+
                         if event.type == 'QUIT':
                             self.program_is_running = False
                             break

@@ -63,6 +63,8 @@ class AggressiveStrategy(FightingStrategy):
     """ An aggressive strategy that always moves towards the player and attacks them. """
     @staticmethod
     def choose_move(current_model: 'src.model.FullModel', mob: 'src.fighter.Mob'):
+        if len(current_model.players) == 0:
+            return mob.position
         player_position = closest_player(current_model, mob.position).position
         best_position = mob.position
 
@@ -78,6 +80,8 @@ class CowardlyStrategy(FightingStrategy):
     """ A cowardly strategy that always moves away from the player. """
     @staticmethod
     def choose_move(current_model: 'src.model.FullModel', mob: 'src.fighter.Mob'):
+        if len(current_model.players) == 0:
+            return mob.position
         player_position = closest_player(current_model, mob.position).position
         best_position = mob.position
 
