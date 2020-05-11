@@ -16,12 +16,11 @@ from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
 
 class Subscriber:
     """ Class that stores players that have subscribed to the current game. """
-    def __init__(self, subscriber_id, room, player):
+    def __init__(self, subscriber_id, room_name, player):
         """ Creates a new subscriber from the given player in the given room. """
         self.id = subscriber_id
-        self.room = room
+        self.room = room_name
         self.player = player
-        self.subscribed = True
         self.queue = queue.Queue()
 
 
@@ -132,6 +131,7 @@ class RoomManager:
         return subscriber_id
 
     def unsubscribe(self, subscriber_id):
+        """ Unsubscribes the subscriber with the given id from their room. """
         room = self.get_room_by_id(subscriber_id)
         if subscriber_id in room.subscribers:
             room.subscribers[subscriber_id].player.hp = 0
