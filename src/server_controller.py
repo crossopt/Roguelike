@@ -68,7 +68,7 @@ class RoomManager():
 
         player = self.spawn_player(self.rooms[room])
 
-        id = len(subscribers) - 1
+        id = len(subscribers)
         self.subcribers[id] = Subscriber(id, room, player)
         self.subscribed += 1
         return str(id)
@@ -102,14 +102,49 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         while True:
             time.sleep(1)
 
-    def tick(self):
+    def tick(self, model):
         self.intentions_got = 0
+
+        game_map = model.map
+        fighters = model.get_fighters()
+
+        random.shuffle(fighters)
+
+        for fighter in fighters:
+            intended_position = fighter.choose_move(model)
+            if not game_map.is_empty(intended_position):
+                intended_position = fighter.position
+            target = model.get_fighter_at(intended_position)
+            if target is not None and intended_position != fighter.position:
+                self.fighting_system.fight(fighter, target)
+            if target is None:
+                fighter.position = intended_position
+
+
+
+        players = []
+        for player in self.model.mobs:
+            if player.hp > 0:
+                players.append(player)
+        self.model.players = players
+
+
+        mobs = []
+        for mob in self.model.mobs:
+            if mob.hp > 0:
+                mobs.append(mob)
+        self.model.mobs = mobs
+
         pass
 
     def Join(self, request, context):
-        self.room_manager.subscribe(request.room)
+        id = self.room_manager.subscribe(request.room)
+        yield src.roguelike_pb2.Id(id)
 
         while self.room_manager.get_queue(id).get():
+            if self.room_manager.get_subscriber(id).player.hp <= 0:
+                yield src.roguelike_pb2.Id("dead")
+                return
             yield src.roguelike_pb2.Id(id)
 
     def GetMap(self, request, context):
@@ -145,7 +180,8 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
 
     def SendIntention(self, request, context):
         id = request.id
-        player = self.room_manager.get_subscriber(id).player
+        subscriber = self.room_manager.get_subscriber(id)
+        player = subscriber.player
         moves = {
             0: "stay",
             1: "go_left",
@@ -157,7 +193,9 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         self.intentions_got += 1
 
         if self.intentions_got == self.subscribed:
-            self.tick()
+            self.tick(self.room_manager.get_room(subscriber.room))
+            for subscriber in self.subscribers.values():
+                subscriber.queue.put('Ping')
 
         return src.roguelike_pb2.Empty()
 
