@@ -39,6 +39,23 @@ class Controller:
     TILESET_HORIZONTAL = 16
     TILESET_VERTICAL = 16
 
+    DEFAULT_WEAPON_SET = [
+                WeaponBuilder()
+                .with_name('SABER')
+                .with_attack(2)
+                .with_defence(2)
+                .with_confusion_prob(0.2),
+                WeaponBuilder()
+                .with_name('SPEAR')
+                .with_attack(4)
+                .with_defence(1)
+                .with_confusion_prob(0.1),
+                WeaponBuilder()
+                .with_name('SWORD')
+                .with_attack(1)
+                .with_defence(3)
+                .with_confusion_prob(0.7)]
+
     @abstractmethod
     def run_loop(self):
         """ Starts a new game and runs it until the user quits the game. """
@@ -83,9 +100,7 @@ class OfflineController(Controller):
         parser.add_argument('map_path', type=str, nargs='?', help='path to map file to load')
         parser.add_argument('--new_game', nargs='?', dest='new_game_demanded', const=True,
                             default=False)
-
         args = parser.parse_args()
-
         no_save_file = not os.path.isfile(SAVE_FILE_NAME)
 
         if args.new_game_demanded or no_save_file:
@@ -97,22 +112,7 @@ class OfflineController(Controller):
 
             mobs_count = Controller.MOB_COUNT
             positions = game_map.get_random_empty_positions(mobs_count + 1)
-            player = src.fighter.Player(positions[0], [
-                WeaponBuilder()
-                .with_name('SABER')
-                .with_attack(2)
-                .with_defence(2)
-                .with_confusion_prob(0.2),
-                WeaponBuilder()
-                .with_name('SPEAR')
-                .with_attack(4)
-                .with_defence(1)
-                .with_confusion_prob(0.1),
-                WeaponBuilder()
-                .with_name('SWORD')
-                .with_attack(1)
-                .with_defence(3)
-                .with_confusion_prob(0.7)])
+            player = src.fighter.Player(positions[0], Controller.DEFAULT_WEAPON_SET)
             mobs = [src.fighter.Mob(positions[i], random.choice([
                                 src.strategies.AggressiveStrategy(),
                                 src.strategies.PassiveStrategy(),
@@ -206,13 +206,6 @@ class ClientController:
 
     def __init__(self):
         """ Initializes the game controller for a client so it is ready to start a new game. """
-        parser = ArgumentParser(description='A simple console-based rogue-like game.')
-        parser.add_argument('map_path', type=str, nargs='?', help='path to map file to load')
-        parser.add_argument('--new_game', nargs='?', dest='new_game_demanded', const=True,
-                            default=False)
-
-        args = parser.parse_args()
-
         channel = grpc.insecure_channel('localhost:50051')
         self.stub = src.roguelike_pb2_grpc.GameStub(channel)
         self.pings = self.stub.Join(src.roguelike_pb2.Room(room='test'))
@@ -221,22 +214,7 @@ class ClientController:
         mapm = self.stub.GetMap(self.id)
         tiles = [[MapTile.EMPTY if mapm.data[i * mapm.width + j].isEmpty else MapTile.BLOCKED for j in
                   range(mapm.width)] for i in range(mapm.height)]
-        self.model = ClientModel(WorldMap.from_tiles(tiles), Player(Position(0, 0), [
-                WeaponBuilder()
-                .with_name('SABER')
-                .with_attack(2)
-                .with_defence(2)
-                .with_confusion_prob(0.2),
-                WeaponBuilder()
-                .with_name('SPEAR')
-                .with_attack(4)
-                .with_defence(1)
-                .with_confusion_prob(0.1),
-                WeaponBuilder()
-                .with_name('SWORD')
-                .with_attack(1)
-                .with_defence(3)
-                .with_confusion_prob(0.7)]), [])
+        self.model = ClientModel(WorldMap.from_tiles(tiles), Player(Position(0, 0), Controller.DEFAULT_WEAPON_SET), [])
         self.program_is_running = True
         self.run_loop()
 
