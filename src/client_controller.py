@@ -42,7 +42,7 @@ class ClientController:
         channel = grpc.insecure_channel('localhost:50051')
         self.stub = src.roguelike_pb2_grpc.GameStub(channel)
         self.pings = self.stub.Join(src.roguelike_pb2.Room(room='test'))
-        self.id = self.pings.__next__()
+        self.id = next(self.pings)
         mapm = self.stub.GetMap(self.id)
         tiles = [[MapTile.EMPTY if mapm[i * mapm.width + j].isEmpty else MapTile.BLOCKED for j in
                   range(mapm.width)] for i in range(mapm.height)]
@@ -105,7 +105,7 @@ class ClientController:
                 if not self.program_is_running:
                     break
 
-                result = self.pings.__next__()
+                result = next(self.pings)
 
                 if result == 'dead':
                     self.view.draw_death_screen()

@@ -2,10 +2,6 @@
 
 import queue
 import random
-import time
-from concurrent import futures
-
-import grpc
 
 import src.fighter
 import src.roguelike_pb2
@@ -80,15 +76,6 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
     def __init__(self):
         self.room_manager = RoomManager()
         self.fighting_system = CoolFightingSystem()
-        self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        src.roguelike_pb2_grpc.add_GameServicer_to_server(
-            src.roguelike_pb2_grpc.GameServicer(), self.server)
-        self.server.add_insecure_port('[::]:50051')
-
-    def start(self):
-        self.server.start()
-        while True:
-            time.sleep(1)
 
     def tick(self, model):
         self.intentions_got = 0
@@ -114,7 +101,6 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
                 players.append(player)
         model.players = players
 
-
         mobs = []
         for mob in model.mobs:
             if mob.hp > 0:
@@ -127,7 +113,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
 
         while self.room_manager.get_queue(id).get():
             if self.room_manager.get_subscriber(id).player.hp <= 0:
-                yield src.roguelike_pb2.Id("dead")
+                yield src.roguelike_pb2.Id('dead')
                 return
             yield src.roguelike_pb2.Id(id)
 
