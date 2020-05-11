@@ -238,19 +238,23 @@ class ClientController:
 
                 self.move_done = False
 
+                self.model.player._additional_style = None
+
                 commands = self.model.player.get_commands()
 
-                def move(dir: int):
+                def move(direction: str):
                     if self.move_done:
                         return
-                    self.stub.SendIntention(Intention(moveId=dir, weaponId=self.model.player.used_weapon, id=self.id))
+                    self.model.player._additional_style = direction
+                    self.stub.SendIntention(Intention(
+                        move=src.roguelike_pb2.Move.Value(direction.upper()),
+                        weaponId=self.model.player.used_weapon, id=self.id))
                     self.move_done = True
 
-                commands['stay'] = lambda: move(0)
-                commands['go_up'] = lambda: move(1)
-                commands['go_left'] = lambda: move(2)
-                commands['go_down'] = lambda: move(3)
-                commands['go_right'] = lambda: move(4)
+                command_list = ['stay', 'go_up', 'go_left', 'go_down', 'go_right']
+
+                for command in command_list:
+                    commands[command] = lambda command=command: move(command)
 
                 for event in tcod.event.get():
                     if event.type == 'QUIT':
@@ -276,6 +280,9 @@ class ClientController:
 
                 if not self.program_is_running:
                     break
+
+                self.view.draw(self.model)
+                tcod.console_flush()
 
                 result = next(self.pings)
 

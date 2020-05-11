@@ -23,8 +23,17 @@ message Id {
     string id = 1;
 }
 
+enum Move {
+    UNKNOWN = 0;
+    STAY = 1;
+    GO_UP = 2;
+    GO_LEFT = 3;
+    GO_DOWN = 4;
+    GO_RIGHT = 5;
+}
+
 message Intention {
-    int32 moveId = 1;
+    Move move = 1;
     int32 weaponId = 2;
     Id id = 3;
 }

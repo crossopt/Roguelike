@@ -41,7 +41,8 @@ class View:
             for j in range(VIEW_WIDTH):
                 self.console.bg[i, j] = PATH_COLOR if model.get_map().is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
         for fighter in model.get_drawable_fighters():
-            self._draw_character(fighter.get_position(), offset, ch=ORD_SMILEY, fg=self._style_to_color(fighter.get_style(), fighter.get_intensity()))
+            symbol, color = self._style_to_symbol_and_color(fighter.get_style(), fighter.get_intensity())
+            self._draw_character(fighter.get_position(), offset, ch=symbol, fg=color)
 
         # draw HUD
 
@@ -66,18 +67,28 @@ class View:
         self.console.clear(bg=tcod.black)
         self.console.print(TOTAL_WIDTH // 2, TOTAL_HEIGHT // 2, msg, alignment=tcod.CENTER)
 
-    def _style_to_color(self, style: str, intensity: float):
+    def _style_to_symbol_and_color(self, style: str, intensity: float):
         intensity = 50 + int(intensity * 200)
-        style_to_color = {
+        symbol_style = None
+        if '#' in style:
+            color_style, symbol_style = style.split('#')
+        else:
+            color_style = style
+        to_color = {
             'confused': (0, intensity, 0),
             'passive': (0, 0, intensity),
             'aggressive': (intensity, 0, 0),
             'player': PLAYER_COLOR
-            # 'cowardly': ,
-            # 'other_player': ,
-            # 'unknown': ,
         }
-        return style_to_color.get(style, (intensity, intensity, intensity))
+        to_symbol = {
+            'stay': 30,
+            'go_up': 24,
+            'go_left': 27,
+            'go_down': 25,
+            'go_right': 26,
+        }
+        return (to_symbol.get(symbol_style, ORD_SMILEY),
+                to_color.get(color_style, (intensity, intensity, intensity)))
 
     def _draw_character(self, pos, offset, ch=None, fg=None, bg=None):
         pos_pair = pos.x + offset[0], pos.y + offset[1]

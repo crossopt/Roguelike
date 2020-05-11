@@ -222,14 +222,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         subscriber_id = request.id.id
         subscriber = self.room_manager.get_subscriber(subscriber_id)
         player = subscriber.player
-        moves = {
-            0: 'stay',
-            1: 'go_up',
-            2: 'go_left',
-            3: 'go_down',
-            4: 'go_right',
-        }
-        player.get_commands()[moves[request.moveId]]()
+        player.get_commands()[src.roguelike_pb2.Move.Name(request.move).lower()]()
         weapons = {
             0: 'select_0',
             1: 'select_1',

@@ -82,6 +82,7 @@ class Player(Fighter, DrawableFighter):
         self.inventory = inventory
         self.used_weapon = used_weapon
         self._intentions = []
+        self._additional_style = None
 
     def _add_intention(self, new_intention: PlayerIntention):
         """ Sets the fighter's move intention to a new one. """
@@ -161,7 +162,8 @@ class Player(Fighter, DrawableFighter):
         return self.hp / PLAYER_HP
 
     def get_style(self) -> str:
-        return 'player'
+        return 'player' + (('#' + self._additional_style)
+                           if self._additional_style is not None else '')
 
 
 class RemoteFighter(DrawableFighter):
