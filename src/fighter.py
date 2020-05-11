@@ -141,19 +141,19 @@ class Player(Fighter, DrawableFighter):
 
     def get_additional_attack(self):
         """ Returns the delta added to the player's attack strength from their weapons. """
-        if self.used_weapon is not None:
+        if self.used_weapon != 0:
             return self.inventory[self.used_weapon].attack
         return 0
 
     def get_defence(self):
         """ Returns the delta added to the player's defence from their weapons. """
-        if self.used_weapon is not None:
+        if self.used_weapon != 0:
             return self.inventory[self.used_weapon].defence
         return 0
 
     def get_confusion_prob(self):
         """ Returns the probability with which the player's attack confuses the defendant. """
-        if self.used_weapon is not None:
+        if self.used_weapon != 0:
             return self.inventory[self.used_weapon].confusion_prob
         return 0
 
