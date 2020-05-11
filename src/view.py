@@ -41,7 +41,7 @@ class View:
             for j in range(VIEW_WIDTH):
                 self.console.bg[i, j] = PATH_COLOR if model.get_map().is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
         for fighter in model.get_drawable_fighters():
-            self._draw_character(fighter.position, offset, ch=ORD_SMILEY, fg=self._style_to_color(fighter.get_style(), fighter.get_intensity()))
+            self._draw_character(fighter.get_position(), offset, ch=ORD_SMILEY, fg=self._style_to_color(fighter.get_style(), fighter.get_intensity()))
 
         # draw HUD
 
@@ -58,9 +58,11 @@ class View:
             self.console.print(VIEW_WIDTH, 5 + i, start + player.inventory[i].name)
 
     def draw_death_screen(self):
+        """ Displays a message that the player's character has died. """
         self.draw_message('YOU ARE DEAD')
 
     def draw_message(self, msg: str):
+        """ Displays a message for the user in place of the game. """
         self.console.clear(bg=tcod.black)
         self.console.print(TOTAL_WIDTH // 2, TOTAL_HEIGHT // 2, msg, alignment=tcod.CENTER)
 

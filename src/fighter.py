@@ -1,13 +1,11 @@
 """ Module containing the implementation of various in-game fighters. """
 from abc import abstractmethod, ABC
 from enum import Enum
-from typing import List, Tuple
-
-import tcod
+from typing import List
 
 import src.model
-import src.world_map
 import src.strategies
+import src.world_map
 from src.weapon import Weapon
 
 PLAYER_HP = 20
@@ -52,6 +50,9 @@ class Fighter(ABC):
         """ Selects a move based on the state of the model world. """
         raise NotImplementedError()
 
+    def get_position(self) -> 'src.world_map.Position':
+        return self.position
+
 
 class DrawableFighter(ABC):
     @abstractmethod
@@ -60,6 +61,10 @@ class DrawableFighter(ABC):
 
     @abstractmethod
     def get_style(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_position(self) -> 'src.world_map.Position':
         pass
 
 
@@ -159,15 +164,19 @@ class Player(Fighter, DrawableFighter):
 
 
 class RemoteFighter(DrawableFighter):
-    def __init__(self):
-        self.intensity = None
-        self.style = None
+    def __init__(self, intensity: float, style: str, position: 'src.world_map.Position'):
+        self.intensity = intensity
+        self.style = style
+        self.position = position
 
-    def get_intensity(self) -> int:
+    def get_intensity(self) -> float:
         return self.intensity
 
     def get_style(self) -> str:
         return self.style
+
+    def get_position(self) -> 'src.world_map.Position':
+        return self.position
 
 
 class Mob(Fighter, DrawableFighter):
