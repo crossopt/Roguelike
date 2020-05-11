@@ -3,7 +3,7 @@
 import tcod
 from tcod.console import Console
 
-from src.model import FullModel, DrawableModel
+from src.model import DrawableModel
 from src.world_map import Position
 
 WALL_COLOR = tcod.grey
