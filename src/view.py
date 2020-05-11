@@ -5,7 +5,7 @@ from tcod.console import Console
 
 from src.fighter import MOB_HP
 from src.model import Model
-from src.strategies import ConfusedStrategy, AggressiveStrategy
+from src.strategies import ConfusedStrategy, AggressiveStrategy, PassiveStrategy
 from src.world_map import Position
 
 WALL_COLOR = tcod.grey
@@ -48,6 +48,8 @@ class View:
                 color = (0, intensity, 0)
             elif isinstance(mob.fighting_strategy, AggressiveStrategy):
                 color = (intensity, 0, 0)
+            elif isinstance(mob.fighting_strategy, PassiveStrategy):
+                color = (0, 0, intensity)
             else:
                 color = (intensity, intensity, intensity)
             self._draw_character(mob.position, offset, ch=ORD_SMILEY, fg=color)
