@@ -2,9 +2,6 @@ import os
 import unittest
 
 from src import controller
-from src import world_map
-from src.strategies import PassiveStrategy
-from src.world_map import Position
 from src.model import Model
 
 
