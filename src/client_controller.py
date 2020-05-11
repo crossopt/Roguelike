@@ -1,4 +1,4 @@
-""" Module containing the main controller logic for the game. """
+""" Module containing the main controller logic for the game clients. """
 
 import os
 from argparse import ArgumentParser
@@ -20,7 +20,7 @@ SAVE_FILE_NAME = 'save'
 
 
 class ClientController:
-    """ The class responsible for controlling the main game flow. """
+    """ The class responsible for controlling the main game flow for a game client. """
     _DEFAULT_MAP_WIDTH = 30
     _DEFAULT_MAP_HEIGHT = 30
     _MOB_COUNT = 8
@@ -31,7 +31,7 @@ class ClientController:
     _TILESET_VERTICAL = 16
 
     def __init__(self):
-        """ Initializes the game controller so it is ready to start a new game. """
+        """ Initializes the game controller for a client so it is ready to start a new game. """
         parser = ArgumentParser(description='A simple console-based rogue-like game.')
         parser.add_argument('map_path', type=str, nargs='?', help='path to map file to load')
         parser.add_argument('--new_game', nargs='?', dest='new_game_demanded', const=True,
