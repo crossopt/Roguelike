@@ -54,7 +54,7 @@ class View:
         self.console.print(VIEW_WIDTH, 2, 'DEF ' + str(player.get_defence()))
         self.console.print(VIEW_WIDTH, 4, 'ITEMS:')
         for i in range(len(player.inventory)):
-            start = '*' if i == player.used_weapon else ' '
+            start = '*' if i == player.used_weapon - 1 else ' '
             self.console.print(VIEW_WIDTH, 5 + i, start + player.inventory[i].name)
 
     def draw_death_screen(self):
