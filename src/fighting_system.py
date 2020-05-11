@@ -14,7 +14,6 @@ class CoolFightingSystem:
         if isinstance(attacker, Mob) and isinstance(defender, Mob):
             return
         defender.take_damage(attacker.get_attack())
-        if isinstance(attacker, Player) and \
-           isinstance(defender, Mob) and\
-           random.random() < attacker.get_confusion_prob():
+        if isinstance(attacker, Player) and\
+                isinstance(defender, Mob) and random.random() < attacker.get_confusion_prob():
             defender.become_confused(CONFUSION_TIME)
