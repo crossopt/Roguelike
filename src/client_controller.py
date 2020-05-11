@@ -119,7 +119,7 @@ class ClientController:
 
                 result = next(self.pings)
 
-                if result == 'dead':
+                if result.id == 'dead':
                     self.view.draw_death_screen()
                     tcod.console_flush()
                     self._wait_for_any_key()
