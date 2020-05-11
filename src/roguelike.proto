@@ -23,7 +23,7 @@ message Id {
 }
 
 message Intention {
-    int32 moveId = 1;
+    int32 command = 1;
     int32 weaponId = 2;
     Id id = 3;
 }
@@ -45,7 +45,7 @@ message Mobs {
 message Mob {
     Position position = 1;
     string style = 2;
-    int32 intensity = 3;
+    float intensity = 3;
 }
 
 message Position {
@@ -61,4 +61,5 @@ message Color {
 
 message Player {
     Position position = 1;
+    int32 hp = 2;
 }
