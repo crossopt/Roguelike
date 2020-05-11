@@ -1,16 +1,15 @@
 import unittest
 
 from src import fighter
-from src import world_map
 from src.strategies import PassiveStrategy, CowardlyStrategy, ConfusedStrategy, AggressiveStrategy
 from src.weapon import WeaponBuilder
-from src.world_map import Position
+from src.world_map import Position, WorldMap
 from src.model import Model
 
 
 class TestSnapshots(unittest.TestCase):
     def setUp(self):
-        self.default_map = world_map.WorldMap()
+        self.default_map = WorldMap()
         self.default_player = fighter.Player(Position(0, 0))
         self.default_mob = fighter.Mob(Position(2, 2), PassiveStrategy())
 
@@ -91,7 +90,7 @@ class TestSnapshots(unittest.TestCase):
         self.assertTrue(self.checkModelsAreEqual(model, other_model))
 
     def testSerializing_modelWithMap(self):
-        model = Model(map=world_map.WorldMap())
+        model = Model(map=WorldMap())
         other_model = Model(self.default_map, self.default_player, [self.default_mob])
         self.assertFalse(self.checkModelsAreEqual(model, other_model))
         other_model.set_snapshot(model.get_snapshot())
@@ -128,7 +127,7 @@ class TestSnapshots(unittest.TestCase):
                             fighter.Mob(Position(2, 2), AggressiveStrategy()),
                             fighter.Mob(Position(2, 2), CowardlyStrategy()),
                             fighter.Mob(Position(3, 3), ConfusedStrategy(ConfusedStrategy(PassiveStrategy(), 5), 15))]
-        model = Model(world_map.WorldMap(20, 10), interesting_player, interesting_mobs)
+        model = Model(WorldMap(20, 10), interesting_player, interesting_mobs)
         other_model = Model(self.default_map, self.default_player, [self.default_mob])
         self.assertFalse(self.checkModelsAreEqual(model, other_model))
         other_model.set_snapshot(model.get_snapshot())

@@ -53,20 +53,20 @@ class Controller:
             positions = game_map.get_random_empty_positions(mobs_count + 1)
             player = src.fighter.Player(positions[0], [
                 WeaponBuilder()
-                                        .with_name('SABER')
-                                        .with_attack(2)
-                                        .with_defence(2)
-                                        .with_confusion_prob(0.2),
+                .with_name('SABER')
+                .with_attack(2)
+                .with_defence(2)
+                .with_confusion_prob(0.2),
                 WeaponBuilder()
-                                        .with_name('SPEAR')
-                                        .with_attack(4)
-                                        .with_defence(1)
-                                        .with_confusion_prob(0.1),
+                .with_name('SPEAR')
+                .with_attack(4)
+                .with_defence(1)
+                .with_confusion_prob(0.1),
                 WeaponBuilder()
-                                        .with_name('SWORD')
-                                        .with_attack(1)
-                                        .with_defence(3)
-                                        .with_confusion_prob(0.7)])
+                .with_name('SWORD')
+                .with_attack(1)
+                .with_defence(3)
+                .with_confusion_prob(0.7)])
             mobs = [src.fighter.Mob(positions[i], random.choice([
                 src.strategies.AggressiveStrategy(),
                 src.strategies.PassiveStrategy(),
