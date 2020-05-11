@@ -60,7 +60,7 @@ class Room:
                 fighter.position = intended_position
 
         players = []
-        for player in model.mobs:
+        for player in model.players:
             if player.hp > 0:
                 players.append(player)
         model.players = players
@@ -157,8 +157,8 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
 
         return src.roguelike_pb2.Map(
                 data=[src.roguelike_pb2.Cell(isEmpty=game_map.is_empty(src.world_map.Position(i, j)))
-                for j in range(game_map.width)
-                for i in range(game_map.height)],
+                for i in range(game_map.height)
+                for j in range(game_map.width)],
                 height=game_map.height, width=game_map.width)
 
     def GetPlayer(self, request, context):
@@ -197,11 +197,13 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
             3: 'go_down',
             4: 'go_right',
         }
+        print(request)
         player.get_commands()[moves[request.moveId]]()
 
         room = self.room_manager.get_room_by_id(id)
         room.intentions_got += 1
 
+        print(room.intentions_got, len(room.subscribers))
         if room.intentions_got == len(room.subscribers):
             room._tick()
             for subscriber in room.subscribers.values():
