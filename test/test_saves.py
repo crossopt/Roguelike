@@ -10,6 +10,9 @@ class TestSaves(unittest.TestCase):
         self.controller = controller.Controller(_test_args=[])
         self.controller._remove_saved_game()
 
+    def tearDown(self):
+        self.controller._remove_saved_game()
+
     def testSaveActuallySaves(self):
         self.assertFalse(os.path.isfile(controller.SAVE_FILE_NAME))
         self.controller._save_game()
