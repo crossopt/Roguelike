@@ -71,10 +71,10 @@ class Controller:
                                 src.strategies.PassiveStrategy(),
                                 src.strategies.CowardlyStrategy()])) for i in range(1, mobs_count + 1)]
 
-            self.model = model.Model(game_map, [player], mobs)
+            self.model = model.FullModel(game_map, [player], mobs)
         else:
             with open(SAVE_FILE_NAME, 'r') as file:
-                self.model = model.Model(None, None, None)
+                self.model = model.FullModel(None, None, None)
                 self.model.set_snapshot(file.read())
 
         self.program_is_running = True

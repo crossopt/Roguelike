@@ -3,7 +3,7 @@
 import tcod
 from tcod.console import Console
 
-from src.model import Model
+from src.model import FullModel, DrawableModel
 from src.world_map import Position
 
 WALL_COLOR = tcod.grey
@@ -13,9 +13,6 @@ TEXT_COLOR = tcod.white
 HUD_COLOR = tcod.black
 
 ORD_SMILEY = 1
-
-MOB_SYMBOL = ORD_SMILEY
-PLAYER_SYMBOL = ORD_SMILEY
 
 VIEW_HEIGHT = 13
 VIEW_WIDTH = 13
@@ -35,18 +32,16 @@ class View:
         self.console.default_bg = WALL_COLOR
         self.console.default_fg = TEXT_COLOR
 
-    def draw(self, model: Model):
+    def draw(self, model: DrawableModel):
         """ Displays the current state of the given Model. """
         self.console.clear()
-        assert len(model.players) == 1
-        player = model.players[0]
+        player = model.get_player()
         offset = - player.position.x + OFFSETX, - player.position.y + OFFSETY
         for i in range(VIEW_HEIGHT):
             for j in range(VIEW_WIDTH):
-                self.console.bg[i, j] = PATH_COLOR if model.map.is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
-        for mob in model.mobs:
-            self._draw_character(mob.position, offset, ch=MOB_SYMBOL, fg=self._style_to_color(mob.get_style(), mob.get_intensity()))
-        self._draw_character(player.position, offset, ch=PLAYER_SYMBOL, fg=PLAYER_COLOR)
+                self.console.bg[i, j] = PATH_COLOR if model.get_map().is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
+        for fighter in model.get_drawable_fighters():
+            self._draw_character(fighter.position, offset, ch=ORD_SMILEY, fg=self._style_to_color(fighter.get_style(), fighter.get_intensity()))
 
         # draw HUD
 
@@ -69,11 +64,13 @@ class View:
         self.console.clear(bg=tcod.black)
         self.console.print(TOTAL_WIDTH // 2, TOTAL_HEIGHT // 2, msg, alignment=tcod.CENTER)
 
-    def _style_to_color(self, style: str, intensity: int):
+    def _style_to_color(self, style: str, intensity: float):
+        intensity = 50 + int(intensity * 200)
         style_to_color = {
             'confused': (0, intensity, 0),
             'passive': (0, 0, intensity),
             'aggressive': (intensity, 0, 0),
+            'player': PLAYER_COLOR
             # 'cowardly': ,
             # 'other_player': ,
             # 'unknown': ,

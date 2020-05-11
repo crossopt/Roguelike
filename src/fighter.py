@@ -48,12 +48,22 @@ class Fighter(ABC):
         """ Returns the strength of the fighter's attack. """
 
     @abstractmethod
-    def choose_move(self, current_model: 'src.model.Model'):
+    def choose_move(self, current_model: 'src.model.FullModel'):
         """ Selects a move based on the state of the model world. """
         raise NotImplementedError()
 
 
-class Player(Fighter):
+class DrawableFighter(ABC):
+    @abstractmethod
+    def get_intensity(self) -> float:
+        pass
+
+    @abstractmethod
+    def get_style(self) -> str:
+        pass
+
+
+class Player(Fighter, DrawableFighter):
     """ Class for storing the player-controlled fighter character. """
 
     def __init__(self, position: 'src.model.Position', inventory: List[Weapon] = None,
@@ -96,7 +106,7 @@ class Player(Fighter):
         else:
             self.used_weapon = num
 
-    def choose_move(self, _current_model: 'src.model.Model'):
+    def choose_move(self, _current_model: 'src.model.FullModel'):
         """ Chooses a move for the player based on the current intentions. """
         move = {PlayerIntention.STAY: (0, 0),
                 PlayerIntention.MOVE_UP: (-1, 0),
@@ -141,13 +151,23 @@ class Player(Fighter):
             return self.inventory[self.used_weapon].confusion_prob
         return 0
 
-
-class DrawableFighter(ABC):
-    def get_intensity(self) -> int:
-        pass
+    def get_intensity(self) -> float:
+        return self.hp / PLAYER_HP
 
     def get_style(self) -> str:
-        pass
+        return 'player'
+
+
+class RemoteFighter(DrawableFighter):
+    def __init__(self):
+        self.intensity = None
+        self.style = None
+
+    def get_intensity(self) -> int:
+        return self.intensity
+
+    def get_style(self) -> str:
+        return self.style
 
 
 class Mob(Fighter, DrawableFighter):
@@ -167,14 +187,14 @@ class Mob(Fighter, DrawableFighter):
         """ The mob becomes confused for a chosen amount of ticks. """
         self.fighting_strategy = src.strategies.ConfusedStrategy(self.fighting_strategy, time)
 
-    def choose_move(self, current_model: 'src.model.Model'):
+    def choose_move(self, current_model: 'src.model.FullModel'):
         """ Chooses a move for the mob based on its strategy. """
         chosen_move = self.fighting_strategy.choose_move(current_model, self)
         self.fighting_strategy = self.fighting_strategy.update_strategy()
         return chosen_move
 
-    def get_intensity(self) -> int:
-        return 50 + int(self.hp / MOB_HP * 200)
+    def get_intensity(self) -> float:
+        return self.hp / MOB_HP
 
     def get_style(self) -> str:
         if isinstance(self.fighting_strategy, src.strategies.ConfusedStrategy):

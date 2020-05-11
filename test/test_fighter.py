@@ -4,14 +4,14 @@ from src import fighter
 from src import world_map
 from src.strategies import PassiveStrategy
 from src.world_map import Position
-from src.model import Model
+from src.model import FullModel
 
 
 class TestFighters(unittest.TestCase):
     def setUp(self):
         self.player = fighter.Player(Position(0, 0))
         self.mob = fighter.Mob(Position(2, 2), PassiveStrategy())
-        self.model = Model(world_map.WorldMap(), self.player, [self.mob])
+        self.model = FullModel(world_map.WorldMap(), self.player, [self.mob])
 
     def testGetAttack(self):
         self.assertEqual(fighter.MOB_ATTACK, self.mob.get_attack())
