@@ -16,7 +16,6 @@ from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
 
 class Subscriber:
     """ Class that stores players that have subscribed to the current game. """
-
     def __init__(self, subscriber_id, room, player):
         """ Creates a new subscriber from the given player in the given room. """
         self.id = subscriber_id
@@ -27,8 +26,9 @@ class Subscriber:
 
 
 class Room:
-
+    """ Class that stores a separate instance of the game room. """
     def __init__(self, model, fighting_system):
+        """ Initializes a room with no subscribers. """
         self.model = model
         self.intentions_got = 0
         self.fighting_system = fighting_system
@@ -42,7 +42,8 @@ class Room:
         model.players.append(player)
         return player
 
-    def _tick(self):
+    def tick(self):
+        """ Emulates a tick of the game. """
         self.intentions_got = 0
 
         model = self.model
@@ -76,7 +77,6 @@ class Room:
 
 class RoomManager:
     """ Class responsible for managing various rooms containing the players. """
-
     def __init__(self):
         """ Creates an RoomManager without any rooms. """
         self.subscribers_rooms = {}
@@ -97,7 +97,9 @@ class RoomManager:
             src.strategies.CowardlyStrategy()])) for i in range(0, _MOB_COUNT)]
         self.rooms[room_name] = Room(src.model.FullModel(game_map, [], mobs), CoolFightingSystem())
 
-    def generate_id(self):
+    @staticmethod
+    def generate_id():
+        """ Returns a random unique id. """
         return secrets.token_hex(16)
 
     def subscribe(self, room_name):
@@ -108,7 +110,7 @@ class RoomManager:
         room = self.get_room(room_name)
         player = room.spawn_player()
 
-        subscriber_id = self.generate_id()  # str(len(self.subscribers))
+        subscriber_id = self.generate_id()
         subscriber = Subscriber(subscriber_id, room_name, player)
         room.subscribers[subscriber_id] = subscriber
         self.subscribers_rooms[subscriber_id] = room_name
@@ -118,13 +120,15 @@ class RoomManager:
         room = self.get_room_by_id(subscriber_id)
         if subscriber_id in room.subscribers:
             room.subscribers[subscriber_id].player.hp = 0
-            room.intentions_got -= 1 if len(room.subscribers[subscriber_id].player._intentions) > 0 else 0
+            room.intentions_got -= 1 if room.subscribers[subscriber_id].player.has_intention() else 0
             del room.subscribers[subscriber_id]
 
     def get_room_by_id(self, subscriber_id):
+        """ Returns the room for the subscriber with the given id. """
         return self.rooms[self.subscribers_rooms[subscriber_id]]
 
     def get_room(self, room_name):
+        """ Returns the room with the given name or None if none exists. """
         return self.rooms[room_name]
 
     def get_subscriber(self, subscriber_id):
@@ -133,13 +137,12 @@ class RoomManager:
         return room.subscribers[subscriber_id]
 
     def get_model(self, room_name):
-        """ Returns the room with the given name or None if none exists. """
+        """ Returns the model of the room with the given name or None if none exists. """
         room = self.get_room(room_name)
         return room.model
 
     def get_queue(self, subscriber_id):
-        """ Returns the queue for the subscriber with the given id or None if the subscriber does
-        not exist. """
+        """ Returns the queue for the subscriber_id or None if the subscriber does not exist. """
         return self.get_subscriber(subscriber_id).queue
 
 
@@ -162,13 +165,15 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
                 return
             yield src.roguelike_pb2.Id(id=subscriber_id)
 
-    def _check_intentions(self, room):
+    @staticmethod
+    def _check_intentions(room):
         if room.intentions_got == len(room.subscribers):
-            room._tick()
+            room.tick()
             for subscriber in room.subscribers.values():
                 subscriber.queue.put('Ping')
 
     def Disconnect(self, request, context):
+        """ Disconnects the requesting subscriber from the game. """
         subscriber_id = request.id
         room = self.room_manager.get_room_by_id(subscriber_id)
         self.room_manager.unsubscribe(subscriber_id)
