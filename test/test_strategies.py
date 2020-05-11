@@ -14,28 +14,28 @@ class TestStrategies(unittest.TestCase):
 
     def testPassive(self):
         self.mobs = [fighter.Mob(world_map.Position(5, 5), strategies.PassiveStrategy())]
-        self.model = model.Model(self.map, self.player, self.mobs)
+        self.model = model.FullModel(self.map, [self.player], self.mobs)
 
         self.assertEqual(5, self.mobs[0].choose_move(self.model).x)
         self.assertEqual(5, self.mobs[0].choose_move(self.model).y)
 
     def testAggressive(self):
         self.mobs = [fighter.Mob(world_map.Position(5, 5), strategies.AggressiveStrategy())]
-        self.model = model.Model(self.map, self.player, self.mobs)
+        self.model = model.FullModel(self.map, [self.player], self.mobs)
 
         self.assertEqual(4, self.mobs[0].choose_move(self.model).x)
         self.assertEqual(5, self.mobs[0].choose_move(self.model).y)
 
     def testCowardly(self):
         self.mobs = [fighter.Mob(world_map.Position(5, 5), strategies.CowardlyStrategy())]
-        self.model = model.Model(self.map, self.player, self.mobs)
+        self.model = model.FullModel(self.map, [self.player], self.mobs)
 
         self.assertEqual(5, self.mobs[0].choose_move(self.model).x)
         self.assertEqual(6, self.mobs[0].choose_move(self.model).y)
 
     def testConfusedThenPassive(self):
         self.mobs = [fighter.Mob(world_map.Position(5, 5), strategies.ConfusedStrategy(strategies.PassiveStrategy(), 1))]
-        self.model = model.Model(self.map, self.player, self.mobs)
+        self.model = model.FullModel(self.map, [self.player], self.mobs)
 
         first_move = self.mobs[0].choose_move(self.model)
         neighbours = self.model.map.get_empty_neighbors(self.mobs[0].position)
@@ -45,7 +45,7 @@ class TestStrategies(unittest.TestCase):
 
     def testConfusedRanIntoTrap(self):
         self.mobs = [fighter.Mob(world_map.Position(5, 5), strategies.ConfusedStrategy(strategies.PassiveStrategy(), 1))]
-        self.model = model.Model(self.map, self.player, self.mobs)
+        self.model = model.FullModel(self.map, [self.player], self.mobs)
         self.map.tiles[5][4] = world_map.MapTile.BLOCKED
         self.map.tiles[6][5] = world_map.MapTile.BLOCKED
         self.map.tiles[5][6] = world_map.MapTile.BLOCKED
