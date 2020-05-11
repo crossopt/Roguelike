@@ -121,21 +121,9 @@ class Controller:
             if self.player_died:
                 if os.path.isfile(SAVE_FILE_NAME):
                     os.remove(SAVE_FILE_NAME)
-                self.view.draw_death_screen()
-                tcod.console_flush()
-                self._wait_for_any_key()
             else:
                 with open(SAVE_FILE_NAME, 'w') as file:
                     file.write(self.model.get_snapshot())
-
-    @staticmethod
-    def _wait_for_any_key():
-        for _ in tcod.event.wait():
-            pass
-        while True:
-            for event in tcod.event.wait():
-                if event.type in ['QUIT', 'KEYDOWN']:
-                    return
 
     def _tick(self):
         game_map = self.model.map
