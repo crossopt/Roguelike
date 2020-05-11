@@ -101,14 +101,14 @@ class Player(Fighter, DrawableFighter):
         commands = dict()
         for cmd_name, intention in cmd_name_to_intention.items():
             commands[cmd_name] = lambda intention=intention: self._add_intention(intention)
-        for i in range(ITEM_COUNT):
-            commands['select_' + str(i + 1)] = lambda i=i: self._select_weapon(i)
+        for i in range(ITEM_COUNT+1):
+            commands['select_' + str(i)] = lambda i=i: self._select_weapon(i)
         return commands
 
     def _select_weapon(self, num):
         """ Sets the weapon being used to the chosen weapon. """
         if self.used_weapon == num:
-            self.used_weapon = None
+            self.used_weapon = 0
         else:
             self.used_weapon = num
 

@@ -175,6 +175,7 @@ class Controller:
                        tcod.event.SCANCODE_A: commands['go_left'],
                        tcod.event.SCANCODE_S: commands['go_down'],
                        tcod.event.SCANCODE_D: commands['go_right'],
+                       tcod.event.SCANCODE_0: commands['select_0'],
                        tcod.event.SCANCODE_1: commands['select_1'],
                        tcod.event.SCANCODE_2: commands['select_2'],
                        tcod.event.SCANCODE_3: commands['select_3']}
