@@ -73,7 +73,7 @@ class Player(Fighter, DrawableFighter):
     """ Class for storing the player-controlled fighter character. """
 
     def __init__(self, position: 'src.model.Position', inventory: List[Weapon] = None,
-                 used_weapon=None, hp: int = PLAYER_HP):
+                 used_weapon=0, hp: int = PLAYER_HP):
         """ Initializes a player character with the given initial position. """
         super(Player, self).__init__(position)
         self.hp = hp
