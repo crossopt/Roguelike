@@ -184,21 +184,10 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
                 subscriber.queue.put('Ping')
 
     def Disconnect(self, request, context):
-<<<<<<< HEAD
-        id = request.id
-        print("1")
-        room = self.room_manager.get_room_by_id(id)
-        print("2")
-        self.room_manager.unsubscribe(id)
-        print("3")
-=======
         subscriber_id = request.id
         room = self.room_manager.get_room_by_id(subscriber_id)
         self.room_manager.unsubscribe(subscriber_id)
->>>>>>> c5126623a49479c12a7fcac383633f644eed59c6
         self._check_intentions(room)
-        print("4")
-
         return src.roguelike_pb2.Empty()
 
     def GetMap(self, request, context):
