@@ -94,13 +94,8 @@ class Controller:
 class OfflineController(Controller):
     """ The class responsible for controlling the main game flow for an offline game. """
 
-    def __init__(self):
+    def __init__(self, args):
         """ Initializes the game controller so it is ready to start a new game. """
-        parser = ArgumentParser(description='A simple console-based rogue-like game.')
-        parser.add_argument('map_path', type=str, nargs='?', help='path to map file to load')
-        parser.add_argument('--new_game', nargs='?', dest='new_game_demanded', const=True,
-                            default=False)
-        args = parser.parse_args()
         no_save_file = not os.path.isfile(SAVE_FILE_NAME)
 
         if args.new_game_demanded or no_save_file:
@@ -203,11 +198,11 @@ class OfflineController(Controller):
 class ClientController:
     """ The class responsible for controlling the main game flow for a game client. """
 
-    def __init__(self):
+    def __init__(self, args):
         """ Initializes the game controller for a client so it is ready to start a new game. """
-        channel = grpc.insecure_channel('localhost:50051')
+        channel = grpc.insecure_channel(args.address + ':' + str(args.port))
         self.stub = src.roguelike_pb2_grpc.GameStub(channel)
-        self.pings = self.stub.Join(src.roguelike_pb2.Room(room='test'))
+        self.pings = self.stub.Join(src.roguelike_pb2.Room(room=args.room))
         self.id = next(self.pings)
 
         mapm = self.stub.GetMap(self.id)

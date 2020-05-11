@@ -5,12 +5,12 @@ import random
 import secrets
 
 import src.fighter
+import src.model
 import src.roguelike_pb2
 import src.roguelike_pb2_grpc
 import src.strategies
-import src.model
+import src.client_controller
 from src.fighting_system import CoolFightingSystem
-from src.weapon import WeaponBuilder
 from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
 
 
@@ -38,22 +38,7 @@ class Room:
         """ Creates a new player in a random position in the room. """
         model = self.model
         position = model.map.get_random_empty_positions(1)[0]
-        player = src.fighter.Player(position, [
-            WeaponBuilder()
-            .with_name('SABER')
-            .with_attack(2)
-            .with_defence(2)
-            .with_confusion_prob(0.2),
-            WeaponBuilder()
-            .with_name('SPEAR')
-            .with_attack(4)
-            .with_defence(1)
-            .with_confusion_prob(0.1),
-            WeaponBuilder()
-            .with_name('SWORD')
-            .with_attack(1)
-            .with_defence(3)
-            .with_confusion_prob(0.7)])
+        player = src.fighter.Player(position, src.client_controller.Controller.DEFAULT_WEAPON_SET)
         model.players.append(player)
         return player
 
