@@ -111,6 +111,10 @@ class RoomManager:
         self.subscribers_rooms[id] = room_name
         return id
 
+    def unsubscribe(self, id):
+        room = self.get_room_by_id(id)
+        del room.subscribers[id]
+
     def get_room_by_id(self, id):
         return self.rooms[self.subscribers_rooms[id]]
 
@@ -145,6 +149,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
 
         while self.room_manager.get_queue(id).get():
             if self.room_manager.get_subscriber(id).player.hp <= 0:
+                self.room_manager.unsubscribe(id)
                 yield src.roguelike_pb2.Id(id='dead')
                 return
             yield src.roguelike_pb2.Id(id=id)
@@ -197,108 +202,14 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
             3: 'go_down',
             4: 'go_right',
         }
-        print(request)
         player.get_commands()[moves[request.moveId]]()
 
         room = self.room_manager.get_room_by_id(id)
         room.intentions_got += 1
 
-        print(room.intentions_got, len(room.subscribers))
         if room.intentions_got == len(room.subscribers):
             room._tick()
             for subscriber in room.subscribers.values():
                 subscriber.queue.put('Ping')
 
         return src.roguelike_pb2.Empty()
-
-
-# class Controller():
-#     """ The class responsible for controlling the main game flow. """
-#     _DEFAULT_MAP_WIDTH = 30
-#     _DEFAULT_MAP_HEIGHT = 30
-#     _MOB_COUNT = 8
-
-#     _TILESET_PATH = 'fonts/medium_font.png'
-#     _TILESET_OPTIONS = tcod.FONT_LAYOUT_ASCII_INROW | tcod.FONT_TYPE_GREYSCALE
-#     _TILESET_HORIZONTAL = 16
-#     _TILESET_VERTICAL = 16
-
-#     def __init__(self):
-#         """ Initializes the game controller so it is ready to start a new game. """
-#         # game_map = RandomV1WorldMapSource(Controller._DEFAULT_MAP_HEIGHT,
-#         #                                   Controller._DEFAULT_MAP_WIDTH).get()
-
-#         # mobs_count = Controller._MOB_COUNT
-#         # positions = game_map.get_random_empty_positions(mobs_count)
-#         # mobs = [src.fighter.Mob(positions[i], random.choice([
-#         #                     src.strategies.AggressiveStrategy(),
-#         #                     src.strategies.PassiveStrategy(),
-#         #                     src.strategies.CowardlyStrategy()])) for i in range(0, mobs_count)]
-
-#         # self.model = model.Model(game_map, mobs)
-
-#         self.fighting_system = CoolFightingSystem()
-#         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-#         src.roguelike_pb2_grpc.add_GameServicer_to_server(
-#             src.roguelike_pb2_grpc.GameServicer(), self.server)
-#         self.server.add_insecure_port('[::]:50051')
-#         self.server.start()
-
-#         while True:
-#             time.sleep(1)
-
-
-
-
-
-#     @staticmethod
-#     def _wait_for_any_key():
-#         for _ in tcod.event.wait():
-#             pass
-#         while True:
-#             for event in tcod.event.wait():
-#                 if event.type in ['QUIT', 'KEYDOWN']:
-#                     return
-
-#     def _tick(self):
-#         game_map = self.model.map
-#         fighters = self.model.get_fighters()
-
-#         random.shuffle(fighters)
-
-#         for fighter in fighters:
-#             intended_position = fighter.choose_move(self.model)
-#             if not game_map.is_empty(intended_position):
-#                 intended_position = fighter.position
-#             target = self.model.get_fighter_at(intended_position)
-#             if target is not None and intended_position != fighter.position:
-#                 self.fighting_system.fight(fighter, target)
-#             if target is None:
-#                 fighter.position = intended_position
-
-#         if self.model.player.hp <= 0:
-#             self.program_is_running = False
-#             self.player_died = True
-#         mobs = []
-#         for mob in self.model.mobs:
-#             if mob.hp > 0:
-#                 mobs.append(mob)
-#         self.model.mobs = mobs
-
-#     @staticmethod
-#     def _dispatch(code, _mod, commands):
-#         """ Handles the user's key down presses and sets the relevant intentions for a player.
-
-#         :param code: a scancode of the main key pressed.
-#         :param _mod: a modifier, a mask of the functional keys pressed with the main one.
-#         :param commands: a list of commands to which the key presses match.
-#         """
-#         code_to_cmd = {tcod.event.SCANCODE_W: commands['go_up'],
-#                        tcod.event.SCANCODE_A: commands['go_left'],
-#                        tcod.event.SCANCODE_S: commands['go_down'],
-#                        tcod.event.SCANCODE_D: commands['go_right'],
-#                        tcod.event.SCANCODE_1: commands['select_1'],
-#                        tcod.event.SCANCODE_2: commands['select_2'],
-#                        tcod.event.SCANCODE_3: commands['select_3']}
-#         if code in code_to_cmd:
-#             code_to_cmd[code]()
