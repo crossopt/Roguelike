@@ -1,55 +1,64 @@
 syntax = "proto3";
 
 service Game {
-	rpc GetMap(Empty) returns (Map) {}
-	rpc GetMobs(Empty) returns (Mobs) {}
-	rpc GetPlayer(Empty) returns (Player) {}
+    rpc GetMap(Id) returns (Map) {}
+    rpc GetMobs(Id) returns (Mobs) {}
+    rpc GetPlayer(Id) returns (Player) {}
 
-	rpc SubscribeToUpdates(Empty) returns (stream Empty) {}
+    rpc Join(Room) returns (stream Id) {}
 
-	rpc SendIntention(Intention) returns (Empty) {}
+    rpc SendIntention(Intention) returns (Empty) {}
 }
 
 message Empty {
-	
+    
+}
+
+message Room {
+    string room = 1;
+}
+
+message Id {
+    string id = 1;
 }
 
 message Intention {
-	int32 moveId = 1;
-	int32 weaponId = 2;
+    int32 moveId = 1;
+    int32 weaponId = 2;
+    Id id = 3;
 }
 
 message Map {
-	repeated Cell data = 1;
-	int32 width = 2;
-	int32 height = 3;
+    repeated Cell data = 1;
+    int32 width = 2;
+    int32 height = 3;
 }
 
 message Cell {
-	bool isEmpty = 1;
+    bool isEmpty = 1;
 }
 
 message Mobs {
-	repeated Mob data = 1;
+    repeated Mob data = 1;
 }
 
 message Mob {
-	Position position = 1;
-	string style = 2;
-	int32 intensity = 3;
+    Position position = 1;
+    string style = 2;
+    int32 intensity = 3;
 }
 
 message Position {
-	int32 x = 1;
-	int32 y = 2;
+    int32 x = 1;
+    int32 y = 2;
 }
 
 message Color {
-	uint32 red = 1;
-	uint32 green = 2;
-	uint32 blue = 3;
+    uint32 red = 1;
+    uint32 green = 2;
+    uint32 blue = 3;
 }
 
 message Player {
-	Position position = 1;
+    Position position = 1;
 }
