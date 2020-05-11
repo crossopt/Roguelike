@@ -123,13 +123,13 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
 
     def Join(self, request, context):
         id = self.room_manager.subscribe(request.room)
-        yield src.roguelike_pb2.Id(id)
+        yield src.roguelike_pb2.Id(id=id)
 
         while self.room_manager.get_queue(id).get():
             if self.room_manager.get_subscriber(id).player.hp <= 0:
-                yield src.roguelike_pb2.Id("dead")
+                yield src.roguelike_pb2.Id(id="dead")
                 return
-            yield src.roguelike_pb2.Id(id)
+            yield src.roguelike_pb2.Id(id=id)
 
     def GetMap(self, request, context):
         id = request.id
@@ -137,15 +137,15 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         game_map = self.room_manager.get_room(subscriber.room).map
 
         return src.roguelike_pb2.Map(
-                [src.roguelike_pb2.Cell(game_map.is_empty(src.world_map.Position(i, j))) for j in game_map.width for i in game_map.height],
-                game_map.height, game_map.width)
+                data=[src.roguelike_pb2.Cell(isEmpty=game_map.is_empty(src.world_map.Position(i, j))) for j in game_map.width for i in game_map.height],
+                height=game_map.height, width=game_map.width)
 
     def GetPlayer(self, request, context):
         id = request.id
         subscriber = self.room_manager.get_subscriber(id)
         player = src.roguelike_pb2.Player(
-            src.roguelike_pb2.Position(subscriber.player.position.x, subscriber.player.position.y),
-            subscriber.player.hp)
+            position=src.roguelike_pb2.Position(x=subscriber.player.position.x, y=subscriber.player.position.y),
+            hp=subscriber.player.hp)
         return player
 
     def GetMobs(self, request, context):
@@ -154,10 +154,10 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         model = self.room_manager.get_room(subscriber.room)
         mobs = model.mobs + [player for player in model.players if player != subscriber.player]
         result = src.roguelike_pb2.Mobs(
-                 [src.roguelike_pb2.Mob(
-                     src.roguelike_pb2.Position(mob.position.x, mob.position.y),
-                     mob.get_style(),
-                     mob.get_intensity()
+                 data=[src.roguelike_pb2.Mob(
+                     position=src.roguelike_pb2.Position(mob.position.x, mob.position.y),
+                     style=mob.get_style(),
+                     intensity=mob.get_intensity()
                  ) for mob in mobs]
         )
         return result 
