@@ -67,6 +67,13 @@ class View:
             start = '*' if i == model.player.used_weapon else ' '
             self.console.print(VIEW_WIDTH, 5 + i, start + model.player.inventory[i].name)
 
+    def draw_death_screen(self):
+        self.draw_message('YOU ARE DEAD')
+
+    def draw_message(self, msg: str):
+        self.console.clear(bg=tcod.black)
+        self.console.print(TOTAL_WIDTH // 2, TOTAL_HEIGHT // 2, msg, alignment=tcod.CENTER)
+
     def _draw_character(self, pos, offset, ch=None, fg=None, bg=None):
         pos_pair = pos.x + offset[0], pos.y + offset[1]
         if pos_pair[0] < 0 or pos_pair[0] >= VIEW_HEIGHT or\
