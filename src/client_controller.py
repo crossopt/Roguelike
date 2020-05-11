@@ -8,7 +8,7 @@ import tcod
 import tcod.event
 
 from src import view
-from src.fighter import RemoteFighter
+from src.fighter import RemoteFighter, Player
 from src.model import ClientModel
 from src.roguelike_pb2 import Intention
 from src.view import TOTAL_WIDTH, TOTAL_HEIGHT
@@ -47,7 +47,7 @@ class ClientController:
         mapm = self.stub.GetMap(self.id)
         tiles = [[MapTile.EMPTY if mapm.data[i * mapm.width + j].isEmpty else MapTile.BLOCKED for j in
                   range(mapm.width)] for i in range(mapm.height)]
-        self.model = ClientModel(WorldMap.from_tiles(tiles), None, None)
+        self.model = ClientModel(WorldMap.from_tiles(tiles), Player(Position(0, 0), []), [])
         self.program_is_running = True
         self.run_loop()
 
@@ -74,7 +74,7 @@ class ClientController:
 
                 self.model.other_fighters = [RemoteFighter(mob.intensity, mob.style,
                                                            Position(mob.position.x, mob.position.y))
-                                             for mob in mobsm]
+                                             for mob in mobsm.data]
 
                 self.move_done = False
 
