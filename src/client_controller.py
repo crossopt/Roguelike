@@ -1,19 +1,18 @@
 """ Module containing the main controller logic for the game clients. """
 
-import os
 from argparse import ArgumentParser
+import threading
 
 import grpc
 import tcod
 import tcod.event
 
+import src.roguelike_pb2_grpc
 from src import view
 from src.fighter import RemoteFighter, Player
 from src.model import ClientModel
 from src.roguelike_pb2 import Intention
 from src.view import TOTAL_WIDTH, TOTAL_HEIGHT
-
-import src.roguelike_pb2_grpc
 from src.weapon import WeaponBuilder
 from src.world_map import WorldMap, MapTile, Position
 
@@ -140,6 +139,8 @@ class ClientController:
                     tcod.console_flush()
                     self._wait_for_any_key()
                     self.program_is_running = False
+
+        self.stub.Disconnect(id)
 
     @staticmethod
     def _wait_for_any_key():
