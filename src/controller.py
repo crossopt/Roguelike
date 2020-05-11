@@ -66,9 +66,10 @@ class Controller:
                 .with_attack(1)
                 .with_defence(3)
                 .with_confusion_prob(0.7)])
-            mobs = [src.fighter.Mob(positions[i], src.strategies.AggressiveStrategy() if i < 4
-                                    else src.strategies.CowardlyStrategy())
-                    for i in range(1, mobs_count + 1)]
+            mobs = [src.fighter.Mob(positions[i], random.choice([
+                                src.strategies.AggressiveStrategy(),
+                                src.strategies.PassiveStrategy(),
+                                src.strategies.CowardlyStrategy()])) for i in range(1, mobs_count + 1)]
 
             self.model = model.Model(game_map, player, mobs)
         else:
