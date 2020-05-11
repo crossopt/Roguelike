@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 
-from src.offline_controller import Controller
+from src.client_controller import OfflineController
 
-Controller().run_loop()
+OfflineController().run_loop()
