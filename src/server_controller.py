@@ -83,11 +83,13 @@ class RoomManager:
 
 
 class Servicer(src.roguelike_pb2_grpc.GameServicer):
+    """ Class that implements the interface of the Game service. """
     def __init__(self):
+        """ Creates a Servicer with an empty RoomManager. """
         self.room_manager = RoomManager()
         self.fighting_system = CoolFightingSystem()
 
-    def tick(self, model):
+    def _tick(self, model):
         self.intentions_got = 0
 
         game_map = model.map
@@ -118,6 +120,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         model.mobs = mobs
 
     def Join(self, request, context):
+        """ Processes the joining of a player to the game. """
         id = self.room_manager.subscribe(request.room)
         yield src.roguelike_pb2.Id(id=id)
 
@@ -128,6 +131,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
             yield src.roguelike_pb2.Id(id=id)
 
     def GetMap(self, request, context):
+        """ Returns the game map for the game of the subscriber issuing the request. """
         id = request.id
         subscriber = self.room_manager.get_subscriber(id)
         game_map = self.room_manager.get_room(subscriber.room).map
@@ -139,6 +143,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
                 height=game_map.height, width=game_map.width)
 
     def GetPlayer(self, request, context):
+        """ Returns the player character for the game of the subscriber issuing the request. """
         id = request.id
         subscriber = self.room_manager.get_subscriber(id)
         player = src.roguelike_pb2.Player(
@@ -147,6 +152,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         return player
 
     def GetMobs(self, request, context):
+        """ Returns the mob list for the game of the subscriber issuing the request. """
         id = request.id
         subscriber = self.room_manager.get_subscriber(id)
         model = self.room_manager.get_room(subscriber.room)
@@ -161,6 +167,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         return result 
 
     def SendIntention(self, request, context):
+        """ Sends a move that the subscriber issuing the request wants his player to do. """
         id = request.id
         subscriber = self.room_manager.get_subscriber(id)
         player = subscriber.player
@@ -175,7 +182,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         self.intentions_got += 1
 
         if self.intentions_got == self.room_manager.subscribed:
-            self.tick(self.room_manager.get_room(subscriber.room))
+            self._tick(self.room_manager.get_room(subscriber.room))
             for subscriber in self.room_manager.subscribers.values():
                 subscriber.queue.put('Ping')
 
