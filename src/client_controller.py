@@ -14,6 +14,7 @@ from src.roguelike_pb2 import Intention
 from src.view import TOTAL_WIDTH, TOTAL_HEIGHT
 
 import src.roguelike_pb2_grpc
+from src.weapon import WeaponBuilder
 from src.world_map import WorldMap, MapTile, Position
 
 SAVE_FILE_NAME = 'save'
@@ -47,7 +48,22 @@ class ClientController:
         mapm = self.stub.GetMap(self.id)
         tiles = [[MapTile.EMPTY if mapm.data[i * mapm.width + j].isEmpty else MapTile.BLOCKED for j in
                   range(mapm.width)] for i in range(mapm.height)]
-        self.model = ClientModel(WorldMap.from_tiles(tiles), Player(Position(0, 0), []), [])
+        self.model = ClientModel(WorldMap.from_tiles(tiles), Player(Position(0, 0), [
+                WeaponBuilder()
+                .with_name('SABER')
+                .with_attack(2)
+                .with_defence(2)
+                .with_confusion_prob(0.2),
+                WeaponBuilder()
+                .with_name('SPEAR')
+                .with_attack(4)
+                .with_defence(1)
+                .with_confusion_prob(0.1),
+                WeaponBuilder()
+                .with_name('SWORD')
+                .with_attack(1)
+                .with_defence(3)
+                .with_confusion_prob(0.7)]), [])
         self.program_is_running = True
         self.run_loop()
 
