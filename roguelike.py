@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 
-from src.controller import Controller
+from src.offline_controller import Controller
 
 Controller().run_loop()

@@ -71,7 +71,7 @@ class Controller:
                                 src.strategies.PassiveStrategy(),
                                 src.strategies.CowardlyStrategy()])) for i in range(1, mobs_count + 1)]
 
-            self.model = model.Model(game_map, player, mobs)
+            self.model = model.Model(game_map, [player], mobs)
         else:
             with open(SAVE_FILE_NAME, 'r') as file:
                 self.model = model.Model(None, None, None)
@@ -100,7 +100,7 @@ class Controller:
                 self.view.draw(self.model)
                 tcod.console_flush()
 
-                commands = self.model.player.get_commands()
+                commands = self.model.players[0].get_commands()
 
                 for event in tcod.event.wait():
                     if event.type == 'QUIT':
@@ -115,7 +115,7 @@ class Controller:
                 if not self.program_is_running:
                     break
 
-                while self.model.player.has_intention():
+                while self.model.players[0].has_intention():
                     self._tick()
 
             if self.player_died:
@@ -153,7 +153,7 @@ class Controller:
             if target is None:
                 fighter.position = intended_position
 
-        if self.model.player.hp <= 0:
+        if self.model.players[0].hp <= 0:
             self.program_is_running = False
             self.player_died = True
         mobs = []
@@ -170,7 +170,8 @@ class Controller:
         :param _mod: a modifier, a mask of the functional keys pressed with the main one.
         :param commands: a list of commands to which the key presses match.
         """
-        code_to_cmd = {tcod.event.SCANCODE_W: commands['go_up'],
+        code_to_cmd = {tcod.event.SCANCODE_SPACE: commands['stay'],
+                       tcod.event.SCANCODE_W: commands['go_up'],
                        tcod.event.SCANCODE_A: commands['go_left'],
                        tcod.event.SCANCODE_S: commands['go_down'],
                        tcod.event.SCANCODE_D: commands['go_right'],
