@@ -30,14 +30,15 @@ class Controller:
     _TILESET_HORIZONTAL = 16
     _TILESET_VERTICAL = 16
 
-    def __init__(self):
+    def __init__(self, _test_args=None):
         """ Initializes the game controller so it is ready to start a new game. """
+
         parser = ArgumentParser(description='A simple console-based rogue-like game.')
         parser.add_argument('map_path', type=str, nargs='?', help='path to map file to load')
         parser.add_argument('--new_game', nargs='?', dest='new_game_demanded', const=True,
                             default=False)
 
-        args = parser.parse_args()
+        args = parser.parse_args(_test_args)
 
         no_save_file = not os.path.isfile(SAVE_FILE_NAME)
 
@@ -67,15 +68,13 @@ class Controller:
                 .with_defence(3)
                 .with_confusion_prob(0.7)])
             mobs = [src.fighter.Mob(positions[i], random.choice([
-                                src.strategies.AggressiveStrategy(),
-                                src.strategies.PassiveStrategy(),
-                                src.strategies.CowardlyStrategy()])) for i in range(1, mobs_count + 1)]
+                src.strategies.AggressiveStrategy(),
+                src.strategies.PassiveStrategy(),
+                src.strategies.CowardlyStrategy()])) for i in range(1, mobs_count + 1)]
 
             self.model = model.Model(game_map, player, mobs)
         else:
-            with open(SAVE_FILE_NAME, 'r') as file:
-                self.model = model.Model(None, None, None)
-                self.model.set_snapshot(file.read())
+            self._read_saved_game()
 
         self.program_is_running = True
         self.view = None
@@ -119,14 +118,28 @@ class Controller:
                     self._tick()
 
             if self.player_died:
-                if os.path.isfile(SAVE_FILE_NAME):
-                    os.remove(SAVE_FILE_NAME)
+                self._remove_saved_game()
                 self.view.draw_death_screen()
                 tcod.console_flush()
                 self._wait_for_any_key()
             else:
-                with open(SAVE_FILE_NAME, 'w') as file:
-                    file.write(self.model.get_snapshot())
+                self._save_game()
+
+    def _save_game(self):
+        if self.player_died:
+            return
+        with open(SAVE_FILE_NAME, 'w') as file:
+            file.write(self.model.get_snapshot())
+
+    @staticmethod
+    def _remove_saved_game():
+        if os.path.isfile(SAVE_FILE_NAME):
+            os.remove(SAVE_FILE_NAME)
+
+    def _read_saved_game(self):
+        with open(SAVE_FILE_NAME, 'r') as file:
+            self.model = model.Model(None, None, None)
+            self.model.set_snapshot(file.read())
 
     @staticmethod
     def _wait_for_any_key():
