@@ -129,7 +129,8 @@ class RoomManager:
 
     def unsubscribe(self, id):
         room = self.get_room_by_id(id)
-        del room.subscribers[id]
+        if id in room.room.subscribers:
+            del room.subscribers[id]
 
     def get_room_by_id(self, id):
         return self.rooms[self.subscribers_rooms[id]]
@@ -169,6 +170,18 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
                 yield src.roguelike_pb2.Id(id='dead')
                 return
             yield src.roguelike_pb2.Id(id=id)
+
+    def _check_intentions(self, room):
+        if room.intentions_got == len(room.subscribers):
+            room._tick()
+            for subscriber in room.subscribers.values():
+                subscriber.queue.put('Ping')
+
+    def Disconnect(self, request, context):
+        id = request.id
+        room = self.room_manager.get_room_by_id(id)
+        self.room_manager.unsubscribe(id)
+        self._check_intentions(room)
 
     def GetMap(self, request, context):
         """ Returns the game map for the game of the subscriber issuing the request. """
@@ -231,9 +244,6 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         room = self.room_manager.get_room_by_id(id)
         room.intentions_got += 1
 
-        if room.intentions_got == len(room.subscribers):
-            room._tick()
-            for subscriber in room.subscribers.values():
-                subscriber.queue.put('Ping')
+        self._check_intentions(room)
 
         return src.roguelike_pb2.Empty()

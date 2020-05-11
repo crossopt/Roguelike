@@ -6,6 +6,7 @@ service Game {
     rpc GetPlayer(Id) returns (Player) {}
 
     rpc Join(Room) returns (stream Id) {}
+    rpc Disconnect(Id) returns (Empty) {}
 
     rpc SendIntention(Intention) returns (Empty) {}
 }
