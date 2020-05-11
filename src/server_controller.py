@@ -10,6 +10,7 @@ import src.roguelike_pb2_grpc
 import src.strategies
 from src import model
 from src.fighting_system import CoolFightingSystem
+from src.weapon import WeaponBuilder
 from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
 
 class Subscriber:
@@ -36,7 +37,22 @@ class Room:
         """ Creates a new player in a random position in the room. """
         model = self.model
         position = model.map.get_random_empty_positions(1)[0]
-        player = src.fighter.Player(position)
+        player = src.fighter.Player(position, [
+                WeaponBuilder()
+                .with_name('SABER')
+                .with_attack(2)
+                .with_defence(2)
+                .with_confusion_prob(0.2),
+                WeaponBuilder()
+                .with_name('SPEAR')
+                .with_attack(4)
+                .with_defence(1)
+                .with_confusion_prob(0.1),
+                WeaponBuilder()
+                .with_name('SWORD')
+                .with_attack(1)
+                .with_defence(3)
+                .with_confusion_prob(0.7)])
         model.players.append(player)
         return player
 
@@ -203,6 +219,14 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
             4: 'go_right',
         }
         player.get_commands()[moves[request.moveId]]()
+        weapons = {
+            0: 'select_0',
+            1: 'select_1',
+            2: 'select_2',
+            3: 'select_3',
+        }
+        player.get_commands()[weapons[0]]()
+        player.get_commands()[weapons[request.weaponId]]()
 
         room = self.room_manager.get_room_by_id(id)
         room.intentions_got += 1
