@@ -13,17 +13,18 @@ jsons.set_deserializer(strategy_deserializer, FightingStrategy)
 
 
 class DrawableModel(ABC):
+    """ Class containing all of the necessary information to draw a model. """
     @abstractmethod
     def get_drawable_fighters(self) -> 'List[src.fighter.DrawableFighter]':
-        pass
+        """ Returns a list of the model's drawable fighters. """
 
     @abstractmethod
     def get_player(self) -> 'src.fighter.Player':
-        pass
+        """ Returns the model's player. """
 
     @abstractmethod
     def get_map(self) -> 'src.world_map.WorldMap':
-        pass
+        """ Returns the model's map. """
 
 
 class FullModel(DrawableModel):
@@ -70,6 +71,7 @@ class FullModel(DrawableModel):
 
 
 class ClientModel(DrawableModel):
+    """ The model of the game world as visible to a client of the game. """
     def __init__(self, map: WorldMap = None, player: 'src.fighter.Player' = None,
                  other_fighters: 'List[src.fighter.RemoteFighter]' = None):
         """ Initializes a model with a given initial map, player and list of current mobs. """
@@ -82,7 +84,6 @@ class ClientModel(DrawableModel):
         return [self.player] + self.other_fighters
 
     def get_drawable_fighters(self) -> 'List[src.fighter.DrawableFighter]':
-        """ Returns a list of the fighters currently present in the game. """
         return [self.player] + self.other_fighters
 
     def get_player(self):

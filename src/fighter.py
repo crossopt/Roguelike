@@ -55,17 +55,18 @@ class Fighter(ABC):
 
 
 class DrawableFighter(ABC):
+    """ Class containing all of the necessary information to draw a fighter. """
     @abstractmethod
     def get_intensity(self) -> float:
-        pass
+        """ Returns the intensity of the fighter's color, which corresponds to its health. """
 
     @abstractmethod
     def get_style(self) -> str:
-        pass
+        """ Returns the name of the style that should be used for the fighter's drawing. """
 
     @abstractmethod
     def get_position(self) -> 'src.world_map.Position':
-        pass
+        """ Returns the position that the fighter should be drawn in. """
 
 
 class Player(Fighter, DrawableFighter):
@@ -164,6 +165,7 @@ class Player(Fighter, DrawableFighter):
 
 
 class RemoteFighter(DrawableFighter):
+    """ Class for storing the fighter characters of remote players. """
     def __init__(self, intensity: float, style: str, position: 'src.world_map.Position'):
         self.intensity = intensity
         self.style = style
