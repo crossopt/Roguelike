@@ -151,7 +151,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         return result 
 
     def SendIntention(self, request, context):
-        id = request.id
+        id = request.id.id
         subscriber = self.room_manager.get_subscriber(id)
         player = subscriber.player
         moves = {
@@ -165,6 +165,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         self.intentions_got += 1
 
         if self.intentions_got == self.room_manager.subscribed:
+            print("here")
             self.tick(self.room_manager.get_room(subscriber.room))
             for subscriber in self.room_manager.subscribers.values():
                 subscriber.queue.put('Ping')
