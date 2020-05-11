@@ -23,7 +23,7 @@ message Id {
 }
 
 message Intention {
-    int32 command = 1;
+    int32 moveId = 1;
     int32 weaponId = 2;
     Id id = 3;
 }

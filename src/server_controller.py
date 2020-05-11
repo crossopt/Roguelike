@@ -168,7 +168,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
 
     def SendIntention(self, request, context):
         """ Sends a move that the subscriber issuing the request wants his player to do. """
-        id = request.id
+        id = request.id.id
         subscriber = self.room_manager.get_subscriber(id)
         player = subscriber.player
         moves = {

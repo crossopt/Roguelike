@@ -81,7 +81,7 @@ class ClientController:
                 commands = self.model.player.get_commands()
 
                 def move(dir: int):
-                    self.stub.SendIntention(Intention(command=dir, weaponId=self.model.player.used_weapon, id=self.id))
+                    self.stub.SendIntention(Intention(moveId=dir, weaponId=self.model.player.used_weapon, id=self.id))
                     self.move_done = True
 
                 commands['stay'] = lambda: move(0)
