@@ -58,9 +58,11 @@ class View:
             self.console.print(VIEW_WIDTH, 5 + i, start + player.inventory[i].name)
 
     def draw_death_screen(self):
+        """ Displays a message that the player's character has died. """
         self.draw_message('YOU ARE DEAD')
 
     def draw_message(self, msg: str):
+        """ Displays a message for the user in place of the game. """
         self.console.clear(bg=tcod.black)
         self.console.print(TOTAL_WIDTH // 2, TOTAL_HEIGHT // 2, msg, alignment=tcod.CENTER)
 
