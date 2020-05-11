@@ -1,7 +1,9 @@
 """ Module containing the implementation of various in-game fighters. """
 from abc import abstractmethod, ABC
 from enum import Enum
-from typing import List
+from typing import List, Tuple
+
+import tcod
 
 import src.model
 import src.world_map
@@ -140,7 +142,15 @@ class Player(Fighter):
         return 0
 
 
-class Mob(Fighter):
+class DrawableFighter(ABC):
+    def get_intensity(self) -> int:
+        pass
+
+    def get_style(self) -> str:
+        pass
+
+
+class Mob(Fighter, DrawableFighter):
     """ Class for storing NPC mobs. """
 
     def __init__(self, position: 'src.model.Position',
@@ -162,3 +172,18 @@ class Mob(Fighter):
         chosen_move = self.fighting_strategy.choose_move(current_model, self)
         self.fighting_strategy = self.fighting_strategy.update_strategy()
         return chosen_move
+
+    def get_intensity(self) -> int:
+        return 50 + int(self.hp / MOB_HP * 200)
+
+    def get_style(self) -> str:
+        if isinstance(self.fighting_strategy, src.strategies.ConfusedStrategy):
+            return 'confused'
+        elif isinstance(self.fighting_strategy, src.strategies.AggressiveStrategy):
+            return 'aggressive'
+        elif isinstance(self.fighting_strategy, src.strategies.PassiveStrategy):
+            return 'passive'
+        elif isinstance(self.fighting_strategy, src.strategies.ConfusedStrategy):
+            return 'cowardly'
+        return 'unknown'
+

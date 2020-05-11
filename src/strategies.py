@@ -55,11 +55,15 @@ class FightingStrategy:
         return self
 
 
+def closest_player(model, position):
+    return min(model.players, key=lambda player: model.map.get_distance(position, player.position))
+
+
 class AggressiveStrategy(FightingStrategy):
     """ An aggressive strategy that always moves towards the player and attacks them. """
     @staticmethod
     def choose_move(current_model: 'src.model.Model', mob: 'src.fighter.Mob'):
-        player_position = current_model.player.position
+        player_position = closest_player(current_model, mob.position).position
         best_position = mob.position
 
         for new_position in current_model.map.get_empty_neighbors(mob.position):
@@ -74,7 +78,7 @@ class CowardlyStrategy(FightingStrategy):
     """ A cowardly strategy that always moves away from the player. """
     @staticmethod
     def choose_move(current_model: 'src.model.Model', mob: 'src.fighter.Mob'):
-        player_position = current_model.player.position
+        player_position = closest_player(current_model, mob.position).position
         best_position = mob.position
 
         for new_position in current_model.map.get_empty_neighbors(mob.position):

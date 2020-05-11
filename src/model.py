@@ -15,16 +15,16 @@ jsons.set_deserializer(strategy_deserializer, FightingStrategy)
 class Model:
     """ Class encapsulating the state of the game world. """
 
-    def __init__(self, map: WorldMap = None, player: 'src.fighter.Player' = None,
+    def __init__(self, map: WorldMap = None, players: 'List[src.fighter.Player]' = None,
                  mobs: 'List[src.fighter.Mob]' = None):
         """ Initializes a model with a given initial map, player and list of current mobs. """
         self.map = map
-        self.player = player
+        self.players = players
         self.mobs = mobs
 
     def get_fighters(self):
         """ Returns a list of the fighters currently present in the game. """
-        return [self.player] + self.mobs
+        return self.players + self.mobs
 
     def get_snapshot(self):
         """ Returns a string with the serialized current model world state. """
@@ -34,7 +34,7 @@ class Model:
         """ Deserializes the model world state from a given string to the current model. """
         instance = jsons.loads(data, Model, strict=True)
         self.map = instance.map
-        self.player = instance.player
+        self.players = instance.players
         self.mobs = instance.mobs
 
     def get_fighter_at(self, pos: Position):
