@@ -130,7 +130,6 @@ class OfflineController(Controller):
         self.fighting_system = CoolFightingSystem()
 
     def run_loop(self):
-        """ Starts a new game and runs it until the user quits the game. """
         tcod.console_set_custom_font(
             Controller.TILESET_PATH,
             Controller.TILESET_OPTIONS,
@@ -210,7 +209,7 @@ class ClientController:
         self.stub = src.roguelike_pb2_grpc.GameStub(channel)
         self.pings = self.stub.Join(src.roguelike_pb2.Room(room='test'))
         self.id = next(self.pings)
-        print(self.id)
+
         mapm = self.stub.GetMap(self.id)
         tiles = [[MapTile.EMPTY if mapm.data[i * mapm.width + j].isEmpty else MapTile.BLOCKED for j in
                   range(mapm.width)] for i in range(mapm.height)]
@@ -219,7 +218,6 @@ class ClientController:
         self.run_loop()
 
     def run_loop(self):
-        """ Starts a new game and runs it until the user quits the game. """
         tcod.console_set_custom_font(
             Controller.TILESET_PATH,
             Controller.TILESET_OPTIONS,
