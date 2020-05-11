@@ -92,7 +92,7 @@ class ClientController:
                 commands['go_down'] = lambda: move(3)
                 commands['go_right'] = lambda: move(4)
 
-                for event in tcod.event.wait():
+                for event in tcod.event.get():
                     if event.type == 'QUIT':
                         self.program_is_running = False
                         break
@@ -127,7 +127,7 @@ class ClientController:
 
     @staticmethod
     def _wait_for_any_key():
-        for _ in tcod.event.wait():
+        for _ in tcod.event.get():
             pass
         while True:
             for event in tcod.event.wait():
