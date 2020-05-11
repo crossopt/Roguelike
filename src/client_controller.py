@@ -92,7 +92,7 @@ class ClientController:
                 commands['go_down'] = lambda: move(3)
                 commands['go_right'] = lambda: move(4)
 
-                for _ in tcod.event.wait():
+                for event in tcod.event.wait():
                     if event.type == 'QUIT':
                         self.program_is_running = False
                         break
