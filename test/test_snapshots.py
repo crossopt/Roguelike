@@ -3,6 +3,7 @@ import unittest
 from src import fighter
 from src import world_map
 from src.strategies import PassiveStrategy, CowardlyStrategy, ConfusedStrategy, AggressiveStrategy
+from src.weapon import WeaponBuilder
 from src.world_map import Position
 from src.model import Model
 
@@ -40,7 +41,7 @@ class TestSnapshots(unittest.TestCase):
             first_player.hp == second_player.hp and \
             first_player.used_weapon == second_player.used_weapon and \
             len(first_player.inventory) == len(second_player.inventory) and \
-            sum(map(lambda x, y: not TestSnapshots.checkWeaponsMatch(x, y),
+            sum(map(lambda x: not TestSnapshots.checkWeaponsMatch(x[0], x[1]),
                     zip(first_player.inventory, second_player.inventory))) == 0
 
     @staticmethod
@@ -101,6 +102,33 @@ class TestSnapshots(unittest.TestCase):
                             fighter.Mob(Position(2, 2), AggressiveStrategy()),
                             fighter.Mob(Position(2, 2), CowardlyStrategy()),
                             fighter.Mob(Position(3, 3), ConfusedStrategy(ConfusedStrategy(PassiveStrategy(), 5), 15))])
+        other_model = Model(self.default_map, self.default_player, [self.default_mob])
+        self.assertFalse(self.checkModelsAreEqual(model, other_model))
+        other_model.set_snapshot(model.get_snapshot())
+        self.assertTrue(self.checkModelsAreEqual(model, other_model))
+
+    def testSerializing_modelWithEverything(self):
+        interesting_player = fighter.Player(Position(3, 5), [
+                WeaponBuilder()
+                .with_name('SABER')
+                .with_attack(2)
+                .with_defence(2)
+                .with_confusion_prob(0.2),
+                WeaponBuilder()
+                .with_name('SPEAR')
+                .with_attack(4)
+                .with_defence(1)
+                .with_confusion_prob(0.1),
+                WeaponBuilder()
+                .with_name('SWORD')
+                .with_attack(1)
+                .with_defence(3)
+                .with_confusion_prob(0.7)])
+        interesting_mobs = [fighter.Mob(Position(2, 2), PassiveStrategy()),
+                            fighter.Mob(Position(2, 2), AggressiveStrategy()),
+                            fighter.Mob(Position(2, 2), CowardlyStrategy()),
+                            fighter.Mob(Position(3, 3), ConfusedStrategy(ConfusedStrategy(PassiveStrategy(), 5), 15))]
+        model = Model(world_map.WorldMap(20, 10), interesting_player, interesting_mobs)
         other_model = Model(self.default_map, self.default_player, [self.default_mob])
         self.assertFalse(self.checkModelsAreEqual(model, other_model))
         other_model.set_snapshot(model.get_snapshot())
