@@ -2,6 +2,7 @@
 
 import queue
 import random
+import secrets
 
 import src.fighter
 import src.roguelike_pb2
@@ -10,9 +11,6 @@ import src.strategies
 from src import model
 from src.fighting_system import CoolFightingSystem
 from src.world_map import FileWorldMapSource, RandomV1WorldMapSource
-
-SAVE_FILE_NAME = 'save'
-
 
 class Subscriber:
     """ Class that stores players that have subscribed to the current game. """
@@ -25,73 +23,27 @@ class Subscriber:
         self.queue = queue.Queue()
 
 
-class RoomManager:
-    """ Class responsible for managing various rooms containing the players. """
-    def __init__(self):
-        """ Creates an RoomManager without any rooms. """
+class Room:
+
+    def __init__(self, model, fighting_system):
+        self.model = model
+        self.intentions_got = 0
+        self.fighting_system = fighting_system
         self.subscribers = {}
-        self.rooms = {}
-        self.subscribed = 0
 
-    def create_new_room(self, room_name):
-        """ Creates a new room with the given name to manage. """
-        _DEFAULT_MAP_WIDTH = 30
-        _DEFAULT_MAP_HEIGHT = 30
-        _MOB_COUNT = 8
-        game_map = RandomV1WorldMapSource(_DEFAULT_MAP_HEIGHT,
-                                          _DEFAULT_MAP_WIDTH).get()
 
-        positions = game_map.get_random_empty_positions(_MOB_COUNT)
-        mobs = [src.fighter.Mob(positions[i], random.choice([
-                            src.strategies.AggressiveStrategy(),
-                            src.strategies.PassiveStrategy(),
-                            src.strategies.CowardlyStrategy()])) for i in range(0, _MOB_COUNT)]
-        self.rooms[room_name] = model.FullModel(game_map, [], mobs)
-
-    def spawn_player(self, destination_model):
-        """ Creates a new player in a random position in the given model. """
-        position = destination_model.map.get_random_empty_positions(1)[0]
+    def spawn_player(self):
+        """ Creates a new player in a random position in the room. """
+        model = self.model
+        position = model.map.get_random_empty_positions(1)[0]
         player = src.fighter.Player(position)
-        destination_model.players.append(player)
+        model.players.append(player)
         return player
 
-    def subscribe(self, room_name):
-        """ Creates a player in the given room, subscribes them to the game, returns an unique player id. """
-        if room_name not in self.rooms:
-            self.create_new_room(room_name)
-
-        player = self.spawn_player(self.rooms[room_name])
-
-        id = str(len(self.subscribers))
-        self.subscribers[id] = Subscriber(id, room_name, player)
-        self.subscribed += 1
-        return id
-
-    def get_subscriber(self, id):
-        """ Returns the subscriber with the given id or None if none exists. """
-        return self.subscribers.get(id, None)
-
-    def get_room(self, room_name):
-        """ Returns the room with the given name or None if none exists. """
-        return self.rooms.get(room_name, None)
-
-    def get_queue(self, id):
-        """ Returns the queue for the subscriber with the given id or None if the subscriber does not exist. """
-        if id in self.subscribers:
-            return self.subscribers[id].queue
-        return None
-
-
-class Servicer(src.roguelike_pb2_grpc.GameServicer):
-    """ Class that implements the interface of the Game service. """
-    def __init__(self):
-        """ Creates a Servicer with an empty RoomManager. """
-        self.room_manager = RoomManager()
-        self.fighting_system = CoolFightingSystem()
-
-    def _tick(self, model):
+    def _tick(self):
         self.intentions_got = 0
 
+        model = self.model
         game_map = model.map
         fighters = model.get_fighters()
 
@@ -119,6 +71,73 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
                 mobs.append(mob)
         model.mobs = mobs
 
+
+class RoomManager:
+    """ Class responsible for managing various rooms containing the players. """
+    def __init__(self):
+        """ Creates an RoomManager without any rooms. """
+        self.subscribers_rooms = {}
+        self.rooms = {}
+
+    def create_new_room(self, room_name):
+        """ Creates a new room with the given name to manage. """
+        _DEFAULT_MAP_WIDTH = 30
+        _DEFAULT_MAP_HEIGHT = 30
+        _MOB_COUNT = 8
+        game_map = RandomV1WorldMapSource(_DEFAULT_MAP_HEIGHT,
+                                          _DEFAULT_MAP_WIDTH).get()
+
+        positions = game_map.get_random_empty_positions(_MOB_COUNT)
+        mobs = [src.fighter.Mob(positions[i], random.choice([
+                            src.strategies.AggressiveStrategy(),
+                            src.strategies.PassiveStrategy(),
+                            src.strategies.CowardlyStrategy()])) for i in range(0, _MOB_COUNT)]
+        self.rooms[room_name] = Room(model.FullModel(game_map, [], mobs), CoolFightingSystem())
+
+    def generate_id(self):
+        return secrets.token_hex(16)
+
+    def subscribe(self, room_name):
+        """ Creates a player in the given room, subscribes them to the game, returns an unique player id. """
+        if room_name not in self.rooms:
+            self.create_new_room(room_name)
+
+        room = self.get_room(room_name)
+        player = room.spawn_player()
+
+        id = self.generate_id() # str(len(self.subscribers))
+        subscriber = Subscriber(id, room_name, player)
+        room.subscribers[id] = subscriber
+        self.subscribers_rooms[id] = room_name
+        return id
+
+    def get_room_by_id(self, id):
+        return self.rooms[self.subscribers_rooms[id]]
+
+    def get_room(self, room_name):
+        return self.rooms[room_name]
+
+    def get_subscriber(self, id):
+        """ Returns the subscriber with the given id or None if none exists. """
+        room = self.get_room_by_id(id)
+        return room.subscribers[id]
+
+    def get_model(self, room_name):
+        """ Returns the room with the given name or None if none exists. """
+        room = self.get_room(room_name)
+        return room.model
+
+    def get_queue(self, id):
+        """ Returns the queue for the subscriber with the given id or None if the subscriber does not exist. """
+        return self.get_subscriber(id).queue
+
+
+class Servicer(src.roguelike_pb2_grpc.GameServicer):
+    """ Class that implements the interface of the Game service. """
+    def __init__(self):
+        """ Creates a Servicer with an empty RoomManager. """
+        self.room_manager = RoomManager()
+
     def Join(self, request, context):
         """ Processes the joining of a player to the game. """
         id = self.room_manager.subscribe(request.room)
@@ -134,7 +153,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         """ Returns the game map for the game of the subscriber issuing the request. """
         id = request.id
         subscriber = self.room_manager.get_subscriber(id)
-        game_map = self.room_manager.get_room(subscriber.room).map
+        game_map = self.room_manager.get_model(subscriber.room).map
 
         return src.roguelike_pb2.Map(
                 data=[src.roguelike_pb2.Cell(isEmpty=game_map.is_empty(src.world_map.Position(i, j)))
@@ -155,7 +174,7 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
         """ Returns the mob list for the game of the subscriber issuing the request. """
         id = request.id
         subscriber = self.room_manager.get_subscriber(id)
-        model = self.room_manager.get_room(subscriber.room)
+        model = self.room_manager.get_model(subscriber.room)
         mobs = model.mobs + [player for player in model.players if player != subscriber.player]
         result = src.roguelike_pb2.Mobs(
                  data=[src.roguelike_pb2.Mob(
@@ -179,11 +198,13 @@ class Servicer(src.roguelike_pb2_grpc.GameServicer):
             4: 'go_right',
         }
         player.get_commands()[moves[request.moveId]]()
-        self.intentions_got += 1
 
-        if self.intentions_got == self.room_manager.subscribed:
-            self._tick(self.room_manager.get_room(subscriber.room))
-            for subscriber in self.room_manager.subscribers.values():
+        room = self.room_manager.get_room_by_id(id)
+        room.intentions_got += 1
+
+        if room.intentions_got == len(room.subscribers):
+            room._tick()
+            for subscriber in room.subscribers.values():
                 subscriber.queue.put('Ping')
 
         return src.roguelike_pb2.Empty()
