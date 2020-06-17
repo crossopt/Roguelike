@@ -3,15 +3,12 @@
 import tcod
 from tcod.console import Console
 
-from src.fighter import MOB_HP
-from src.model import Model
-from src.strategies import ConfusedStrategy, AggressiveStrategy, PassiveStrategy
+from src.model import DrawableModel
 from src.world_map import Position
 
 WALL_COLOR = tcod.grey
 PATH_COLOR = tcod.black
 PLAYER_COLOR = tcod.yellow
-MOB_COLOR = tcod.red
 TEXT_COLOR = tcod.white
 HUD_COLOR = tcod.black
 
@@ -35,25 +32,17 @@ class View:
         self.console.default_bg = WALL_COLOR
         self.console.default_fg = TEXT_COLOR
 
-    def draw(self, model: Model):
+    def draw(self, model: DrawableModel):
         """ Displays the current state of the given Model. """
         self.console.clear()
-        offset = - model.player.position.x + OFFSETX, - model.player.position.y + OFFSETY
+        player = model.get_player()
+        offset = - player.position.x + OFFSETX, - player.position.y + OFFSETY
         for i in range(VIEW_HEIGHT):
             for j in range(VIEW_WIDTH):
-                self.console.bg[i, j] = PATH_COLOR if model.map.is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
-        for mob in model.mobs:
-            intensity = 50 + int(mob.hp / MOB_HP * 200)
-            if isinstance(mob.fighting_strategy, ConfusedStrategy):
-                color = (0, intensity, 0)
-            elif isinstance(mob.fighting_strategy, AggressiveStrategy):
-                color = (intensity, 0, 0)
-            elif isinstance(mob.fighting_strategy, PassiveStrategy):
-                color = (0, 0, intensity)
-            else:
-                color = (intensity, intensity, intensity)
-            self._draw_character(mob.position, offset, ch=ORD_SMILEY, fg=color)
-        self._draw_character(model.player.position, offset, ch=ORD_SMILEY, fg=PLAYER_COLOR)
+                self.console.bg[i, j] = PATH_COLOR if model.get_map().is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
+        for fighter in model.get_drawable_fighters():
+            symbol, color = self._style_to_symbol_and_color(fighter.get_style(), fighter.get_intensity())
+            self._draw_character(fighter.get_position(), offset, ch=symbol, fg=color)
 
         # draw HUD
 
@@ -61,13 +50,13 @@ class View:
             for j in range(VIEW_WIDTH, VIEW_WIDTH + HUD_WIDTH):
                 self.console.bg[i, j] = HUD_COLOR
 
-        self.console.print(VIEW_WIDTH, 0, 'HP  ' + str(model.player.hp))
-        self.console.print(VIEW_WIDTH, 1, 'ATK ' + str(model.player.get_base_attack()) + '+' + str(model.player.get_additional_attack()))
-        self.console.print(VIEW_WIDTH, 2, 'DEF ' + str(model.player.get_defence()))
+        self.console.print(VIEW_WIDTH, 0, 'HP  ' + str(player.hp))
+        self.console.print(VIEW_WIDTH, 1, 'ATK ' + str(player.get_base_attack()) + '+' + str(player.get_additional_attack()))
+        self.console.print(VIEW_WIDTH, 2, 'DEF ' + str(player.get_defence()))
         self.console.print(VIEW_WIDTH, 4, 'ITEMS:')
-        for i in range(len(model.player.inventory)):
-            start = '*' if i == model.player.used_weapon else ' '
-            self.console.print(VIEW_WIDTH, 5 + i, start + model.player.inventory[i].name)
+        for i in range(len(player.inventory)):
+            start = '*' if i == player.used_weapon - 1 else ' '
+            self.console.print(VIEW_WIDTH, 5 + i, start + player.inventory[i].name)
 
     def draw_death_screen(self):
         """ Displays a message that the player's character has died. """
@@ -77,6 +66,29 @@ class View:
         """ Displays a message for the user in place of the game. """
         self.console.clear(bg=tcod.black)
         self.console.print(TOTAL_WIDTH // 2, TOTAL_HEIGHT // 2, msg, alignment=tcod.CENTER)
+
+    def _style_to_symbol_and_color(self, style: str, intensity: float):
+        intensity = 50 + int(intensity * 200)
+        symbol_style = None
+        if '#' in style:
+            color_style, symbol_style = style.split('#')
+        else:
+            color_style = style
+        to_color = {
+            'confused': (0, intensity, 0),
+            'passive': (0, 0, intensity),
+            'aggressive': (intensity, 0, 0),
+            'player': PLAYER_COLOR
+        }
+        to_symbol = {
+            'stay': 30,
+            'go_up': 24,
+            'go_left': 27,
+            'go_down': 25,
+            'go_right': 26,
+        }
+        return (to_symbol.get(symbol_style, ORD_SMILEY),
+                to_color.get(color_style, (intensity, intensity, intensity)))
 
     def _draw_character(self, pos, offset, ch=None, fg=None, bg=None):
         pos_pair = pos.x + offset[0], pos.y + offset[1]

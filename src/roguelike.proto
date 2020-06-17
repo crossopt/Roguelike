@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+service Game {
+    rpc GetMap(Id) returns (Map) {}
+    rpc GetMobs(Id) returns (Mobs) {}
+    rpc GetPlayer(Id) returns (Player) {}
+
+    rpc Join(Room) returns (stream Id) {}
+    rpc Disconnect(Id) returns (Empty) {}
+
+    rpc SendIntention(Intention) returns (Empty) {}
+}
+
+message Empty {
+    
+}
+
+message Room {
+    string room = 1;
+}
+
+message Id {
+    string id = 1;
+}
+
+enum Move {
+    UNKNOWN = 0;
+    STAY = 1;
+    GO_UP = 2;
+    GO_LEFT = 3;
+    GO_DOWN = 4;
+    GO_RIGHT = 5;
+}
+
+message Intention {
+    Move move = 1;
+    int32 weaponId = 2;
+    Id id = 3;
+}
+
+message Map {
+    repeated Cell data = 1;
+    int32 width = 2;
+    int32 height = 3;
+}
+
+message Cell {
+    bool isEmpty = 1;
+}
+
+message Mobs {
+    repeated Mob data = 1;
+}
+
+message Mob {
+    Position position = 1;
+    string style = 2;
+    float intensity = 3;
+}
+
+message Position {
+    int32 x = 1;
+    int32 y = 2;
+}
+
+message Color {
+    uint32 red = 1;
+    uint32 green = 2;
+    uint32 blue = 3;
+}
+
+message Player {
+    Position position = 1;
+    int32 hp = 2;
+}

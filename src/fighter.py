@@ -4,8 +4,8 @@ from enum import Enum
 from typing import List
 
 import src.model
-import src.world_map
 import src.strategies
+import src.world_map
 from src.weapon import Weapon
 
 PLAYER_HP = 20
@@ -46,16 +46,34 @@ class Fighter(ABC):
         """ Returns the strength of the fighter's attack. """
 
     @abstractmethod
-    def choose_move(self, current_model: 'src.model.Model'):
+    def choose_move(self, current_model: 'src.model.FullModel'):
         """ Selects a move based on the state of the model world. """
         raise NotImplementedError()
 
+    def get_position(self) -> 'src.world_map.Position':
+        return self.position
 
-class Player(Fighter):
+
+class DrawableFighter(ABC):
+    """ Class containing all of the necessary information to draw a fighter. """
+    @abstractmethod
+    def get_intensity(self) -> float:
+        """ Returns the intensity of the fighter's color, which corresponds to its health. """
+
+    @abstractmethod
+    def get_style(self) -> str:
+        """ Returns the name of the style that should be used for the fighter's drawing. """
+
+    @abstractmethod
+    def get_position(self) -> 'src.world_map.Position':
+        """ Returns the position that the fighter should be drawn in. """
+
+
+class Player(Fighter, DrawableFighter):
     """ Class for storing the player-controlled fighter character. """
 
     def __init__(self, position: 'src.model.Position', inventory: List[Weapon] = None,
-                 used_weapon=None, hp: int = PLAYER_HP):
+                 used_weapon=0, hp: int = PLAYER_HP):
         """ Initializes a player character with the given initial position. """
         super(Player, self).__init__(position)
         self.hp = hp
@@ -64,6 +82,7 @@ class Player(Fighter):
         self.inventory = inventory
         self.used_weapon = used_weapon
         self._intentions = []
+        self._additional_style = None
 
     def _add_intention(self, new_intention: PlayerIntention):
         """ Sets the fighter's move intention to a new one. """
@@ -83,18 +102,18 @@ class Player(Fighter):
         commands = dict()
         for cmd_name, intention in cmd_name_to_intention.items():
             commands[cmd_name] = lambda intention=intention: self._add_intention(intention)
-        for i in range(ITEM_COUNT):
-            commands['select_' + str(i + 1)] = lambda i=i: self._select_weapon(i)
+        for i in range(ITEM_COUNT+1):
+            commands['select_' + str(i)] = lambda i=i: self._select_weapon(i)
         return commands
 
     def _select_weapon(self, num):
         """ Sets the weapon being used to the chosen weapon. """
         if self.used_weapon == num:
-            self.used_weapon = None
+            self.used_weapon = 0
         else:
             self.used_weapon = num
 
-    def choose_move(self, _current_model: 'src.model.Model'):
+    def choose_move(self, _current_model: 'src.model.FullModel'):
         """ Chooses a move for the player based on the current intentions. """
         move = {PlayerIntention.STAY: (0, 0),
                 PlayerIntention.MOVE_UP: (-1, 0),
@@ -123,24 +142,48 @@ class Player(Fighter):
 
     def get_additional_attack(self):
         """ Returns the delta added to the player's attack strength from their weapons. """
-        if self.used_weapon is not None:
-            return self.inventory[self.used_weapon].attack
+        if self.used_weapon != 0:
+            return self.inventory[self.used_weapon - 1].attack
         return 0
 
     def get_defence(self):
         """ Returns the delta added to the player's defence from their weapons. """
-        if self.used_weapon is not None:
-            return self.inventory[self.used_weapon].defence
+        if self.used_weapon != 0:
+            return self.inventory[self.used_weapon - 1].defence
         return 0
 
     def get_confusion_prob(self):
         """ Returns the probability with which the player's attack confuses the defendant. """
-        if self.used_weapon is not None:
-            return self.inventory[self.used_weapon].confusion_prob
+        if self.used_weapon != 0:
+            return self.inventory[self.used_weapon - 1].confusion_prob
         return 0
 
+    def get_intensity(self) -> float:
+        return self.hp / PLAYER_HP
 
-class Mob(Fighter):
+    def get_style(self) -> str:
+        return 'player' + (('#' + self._additional_style)
+                           if self._additional_style is not None else '')
+
+
+class RemoteFighter(DrawableFighter):
+    """ Class for storing the fighter characters of remote players. """
+    def __init__(self, intensity: float, style: str, position: 'src.world_map.Position'):
+        self.intensity = intensity
+        self.style = style
+        self.position = position
+
+    def get_intensity(self) -> float:
+        return self.intensity
+
+    def get_style(self) -> str:
+        return self.style
+
+    def get_position(self) -> 'src.world_map.Position':
+        return self.position
+
+
+class Mob(Fighter, DrawableFighter):
     """ Class for storing NPC mobs. """
 
     def __init__(self, position: 'src.model.Position',
@@ -157,8 +200,23 @@ class Mob(Fighter):
         """ The mob becomes confused for a chosen amount of ticks. """
         self.fighting_strategy = src.strategies.ConfusedStrategy(self.fighting_strategy, time)
 
-    def choose_move(self, current_model: 'src.model.Model'):
+    def choose_move(self, current_model: 'src.model.FullModel'):
         """ Chooses a move for the mob based on its strategy. """
         chosen_move = self.fighting_strategy.choose_move(current_model, self)
         self.fighting_strategy = self.fighting_strategy.update_strategy()
         return chosen_move
+
+    def get_intensity(self) -> float:
+        return self.hp / MOB_HP
+
+    def get_style(self) -> str:
+        if isinstance(self.fighting_strategy, src.strategies.ConfusedStrategy):
+            return 'confused'
+        elif isinstance(self.fighting_strategy, src.strategies.AggressiveStrategy):
+            return 'aggressive'
+        elif isinstance(self.fighting_strategy, src.strategies.PassiveStrategy):
+            return 'passive'
+        elif isinstance(self.fighting_strategy, src.strategies.ConfusedStrategy):
+            return 'cowardly'
+        return 'unknown'
+
