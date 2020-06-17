@@ -226,15 +226,15 @@ class ClientController:
             self.view = view.View(root_console)
 
             while self.program_is_running:
-                playerm = self.stub.GetPlayer(self.id)
-                mobsm = self.stub.GetMobs(self.id)
+                client_player = self.stub.GetPlayer(self.id)
+                client_mobs = self.stub.GetMobs(self.id)
 
-                self.model.player.position = Position(playerm.position.x, playerm.position.y)
-                self.model.player.hp = playerm.hp
+                self.model.player.position = Position(client_player.position.x, client_player.position.y)
+                self.model.player.hp = client_player.hp
 
                 self.model.other_fighters = [RemoteFighter(mob.intensity, mob.style,
                                                            Position(mob.position.x, mob.position.y))
-                                             for mob in mobsm.data]
+                                             for mob in client_mobs.data]
 
                 self.move_done = False
 
