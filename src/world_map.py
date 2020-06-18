@@ -6,6 +6,8 @@ from itertools import product
 from dataclasses import dataclass
 from typing import List, Iterable
 
+import random
+
 
 @dataclass
 class Position:
@@ -41,14 +43,17 @@ class WorldMap:
     """ Class for storing the world map. """
     _DEFAULT_MAP_SIZE = 10
 
-    def __init__(self, height: int = _DEFAULT_MAP_SIZE, width: int = _DEFAULT_MAP_SIZE):
+    def __init__(self, height: int = _DEFAULT_MAP_SIZE, width: int = _DEFAULT_MAP_SIZE,
+                 tiles: 'List[List[MapTile]]' = None):
         """ Generates a default map example. """
         self.height = height
         self.width = width
-        self.tiles = [[MapTile.EMPTY for _ in range(self.width)] for _ in range(self.height)]
+        if tiles is None:
+            tiles = [[MapTile.EMPTY for _ in range(self.width)] for _ in range(self.height)]
+        self.tiles = tiles
 
-    @classmethod
-    def from_tiles(cls, tiles: List[List[MapTile]]):
+    @staticmethod
+    def from_tiles(tiles: List[List[MapTile]]):
         """ Builds a world map from the given tiles. """
         height = len(tiles)
         width = len(tiles[0])
@@ -56,15 +61,37 @@ class WorldMap:
         game_map.tiles = tiles
         return game_map
 
-    def get_player_start(self):
-        """
-        Returns a starting position for the player: the first free tile,
-        or None if no free tile was found.
-        """
-        for x, y in product(range(self.height), range(self.width)):
-            if self.tiles[x][y] == MapTile.EMPTY:
-                return Position(x, y)
-        return None
+    def get_random_empty_positions(self, count=1):
+        """ Returns a list of random non-repeating empty positions on the map of length count. """
+        positions = []
+        empty = []
+        for i in range(self.height):
+            for j in range(self.width):
+                if self.tiles[i][j] == MapTile.EMPTY:
+                    empty.append(Position(i, j))
+        for i in range(count):
+            p = random.randrange(0, len(empty))
+            positions.append(empty[p])
+            empty.pop(p)
+        return positions
+
+    def is_empty(self, position: Position):
+        """ Checks whether a tile on the map is empty. """
+        return self.is_on_map(position) and self.tiles[position.x][position.y] == MapTile.EMPTY
+
+    @staticmethod
+    def get_distance(first_position: Position, second_position: Position):
+        """ Returns the distance in map metrics between two positions on the map. """
+        return abs(first_position.x - second_position.x) + abs(first_position.y - second_position.y)
+
+    def get_empty_neighbors(self, position: Position):
+        """ Returns list of positions of empty tiles at manhattan distance 1. """
+        empty_neighbors = []
+        for dx, dy in {(0, 1), (0, -1), (1, 0), (-1, 0)}:
+            neighbor = Position(position.x + dx, position.y + dy)
+            if self.is_empty(neighbor):
+                empty_neighbors.append(neighbor)
+        return empty_neighbors
 
     def is_on_map(self, position: Position):
         """ Returns True if the given position exists on the map, False otherwise. """
@@ -101,7 +128,6 @@ class WorldMapSource(ABC):
     @abstractmethod
     def get(self) -> WorldMap:
         """ Produces a world map. """
-        pass
 
 
 class FileWorldMapSource(WorldMapSource):

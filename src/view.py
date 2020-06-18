@@ -3,20 +3,28 @@
 import tcod
 from tcod.console import Console
 
+from src.fighter import MOB_HP
 from src.model import Model
-from src.world_map import MapTile
+from src.strategies import ConfusedStrategy, AggressiveStrategy, PassiveStrategy
+from src.world_map import Position
 
-WALL_COLOR = tcod.white
+WALL_COLOR = tcod.grey
 PATH_COLOR = tcod.black
 PLAYER_COLOR = tcod.yellow
-TEXT_COLOR = tcod.grey
+MOB_COLOR = tcod.red
+TEXT_COLOR = tcod.white
+HUD_COLOR = tcod.black
 
 ORD_SMILEY = 1
 
-TILE_TO_BG = {
-    MapTile.BLOCKED: WALL_COLOR,
-    MapTile.EMPTY: PATH_COLOR
-}
+VIEW_HEIGHT = 13
+VIEW_WIDTH = 13
+HUD_WIDTH = 8
+TOTAL_WIDTH = VIEW_WIDTH + HUD_WIDTH
+TOTAL_HEIGHT = VIEW_HEIGHT
+
+OFFSETX = (VIEW_HEIGHT - 1) // 2
+OFFSETY = (VIEW_WIDTH - 1) // 2
 
 
 class View:
@@ -30,9 +38,54 @@ class View:
     def draw(self, model: Model):
         """ Displays the current state of the given Model. """
         self.console.clear()
-        for i in range(model.map.height):
-            for j in range(model.map.width):
-                self.console.bg[i, j] = TILE_TO_BG[model.map.tiles[i][j]]
-        player_coords = model.player.position.x, model.player.position.y
-        self.console.ch[player_coords] = ORD_SMILEY
-        self.console.fg[player_coords] = PLAYER_COLOR
+        offset = - model.player.position.x + OFFSETX, - model.player.position.y + OFFSETY
+        for i in range(VIEW_HEIGHT):
+            for j in range(VIEW_WIDTH):
+                self.console.bg[i, j] = PATH_COLOR if model.map.is_empty(Position(i - offset[0], j - offset[1])) else WALL_COLOR
+        for mob in model.mobs:
+            intensity = 50 + int(mob.hp / MOB_HP * 200)
+            if isinstance(mob.fighting_strategy, ConfusedStrategy):
+                color = (0, intensity, 0)
+            elif isinstance(mob.fighting_strategy, AggressiveStrategy):
+                color = (intensity, 0, 0)
+            elif isinstance(mob.fighting_strategy, PassiveStrategy):
+                color = (0, 0, intensity)
+            else:
+                color = (intensity, intensity, intensity)
+            self._draw_character(mob.position, offset, ch=ORD_SMILEY, fg=color)
+        self._draw_character(model.player.position, offset, ch=ORD_SMILEY, fg=PLAYER_COLOR)
+
+        # draw HUD
+
+        for i in range(VIEW_HEIGHT):
+            for j in range(VIEW_WIDTH, VIEW_WIDTH + HUD_WIDTH):
+                self.console.bg[i, j] = HUD_COLOR
+
+        self.console.print(VIEW_WIDTH, 0, 'HP  ' + str(model.player.hp))
+        self.console.print(VIEW_WIDTH, 1, 'ATK ' + str(model.player.get_base_attack()) + '+' + str(model.player.get_additional_attack()))
+        self.console.print(VIEW_WIDTH, 2, 'DEF ' + str(model.player.get_defence()))
+        self.console.print(VIEW_WIDTH, 4, 'ITEMS:')
+        for i in range(len(model.player.inventory)):
+            start = '*' if i == model.player.used_weapon else ' '
+            self.console.print(VIEW_WIDTH, 5 + i, start + model.player.inventory[i].name)
+
+    def draw_death_screen(self):
+        """ Displays a message that the player's character has died. """
+        self.draw_message('YOU ARE DEAD')
+
+    def draw_message(self, msg: str):
+        """ Displays a message for the user in place of the game. """
+        self.console.clear(bg=tcod.black)
+        self.console.print(TOTAL_WIDTH // 2, TOTAL_HEIGHT // 2, msg, alignment=tcod.CENTER)
+
+    def _draw_character(self, pos, offset, ch=None, fg=None, bg=None):
+        pos_pair = pos.x + offset[0], pos.y + offset[1]
+        if pos_pair[0] < 0 or pos_pair[0] >= VIEW_HEIGHT or\
+           pos_pair[1] < 0 or pos_pair[1] >= VIEW_WIDTH:
+            return
+        if ch is not None:
+            self.console.ch[pos_pair] = ch
+        if fg is not None:
+            self.console.fg[pos_pair] = fg
+        if bg is not None:
+            self.console.bg[pos_pair] = bg
